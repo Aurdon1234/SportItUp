@@ -1,4 +1,4 @@
-const _jsxFileName = "app\\admin\\page.tsx";"use client"
+"use client";
 
 import { AdminShell } from "@/components/admin/shell"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
