@@ -1,4 +1,5 @@
 import React from "react"
+const _jsxFileName = "app\\privacy\\page.tsx";
 import Link from "next/link"
 
 export default function PrivacyPage() {
