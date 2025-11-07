@@ -1,4 +1,6 @@
-const _jsxFileName = "app\\terms\\page.tsx";import Link from "next/link"
+import React from "react"
+const _jsxFileName = "app\\terms\\page.tsx";
+import Link from "next/link"
 
 export default function TermsPage() {
   return (
