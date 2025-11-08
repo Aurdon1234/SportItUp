@@ -56,10 +56,17 @@
 //   return NextResponse.json({ blockedHours });
 // }
 
-// app/api/public/availability/route.js
 import { NextResponse } from "next/server";
-import { getSheetsClient } from "@/lib/google-sheets";
+import { getBlockedSlotsFor } from "@/lib/google-sheets";
 
+/**
+ * API Endpoint: /api/public/availability
+ * Example usage:
+ *   /api/public/availability?turfId=the-pavilion-amritsar-cricket&date=2025-11-09
+ *
+ * Reads your Google Sheet via getBlockedSlotsFor() and returns:
+ *   { ok: true, blockedHours: ["06:00", "07:00", ...] }
+ */
 export async function GET(req) {
   try {
     console.log("🟢 /api/public/availability called (Google Sheets mode)");
@@ -69,45 +76,26 @@ export async function GET(req) {
     const date = searchParams.get("date");
 
     if (!turfId || !date) {
-      return NextResponse.json({ ok: false, error: "Missing turfId or date" }, { status: 400 });
+      return NextResponse.json(
+        { ok: false, error: "Missing turfId or date" },
+        { status: 400 }
+      );
     }
 
-    const sheets = await getSheetsClient();
-    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-    const sheetTitle = process.env.GOOGLE_SHEETS_SHEET_TITLE || "Bookings";
+    // Get all blocked slots directly from Google Sheets
+    const blockedHours = await getBlockedSlotsFor(turfId, date);
 
-    // Read all rows from the sheet
-    const range = `${sheetTitle}!A2:Z`; // skip header row
-    const response = await sheets.spreadsheets.values.get({
-      spreadsheetId,
-      range,
-    });
-
-    const rows = response.data.values || [];
-
-    // Adjust columns based on how your sheet stores them
-    // Example columns: Timestamp | Name | Phone | Email | Venue | Date | TimeSlot | ...
-    const bookedSlots = rows
-      .filter((r) => {
-        const venue = (r[4] || "").trim().toLowerCase();
-        const bookingDate = (r[5] || "").trim(); // your Date column
-        return venue.includes(turfId.toLowerCase()) && bookingDate === date;
-      })
-      .flatMap((r) => {
-        const slotString = r[6] || ""; // TimeSlot column
-        return slotString
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean);
-      });
-
-    const blockedHours = [...new Set(bookedSlots)];
-
-    console.log("✅ Blocked hours from Sheet:", blockedHours);
+    console.log(
+      `✅ Found ${blockedHours.length} blocked slots for ${turfId} on ${date}:`,
+      blockedHours
+    );
 
     return NextResponse.json({ ok: true, blockedHours });
   } catch (err) {
-    console.error("/api/public/availability failed:", err);
-    return NextResponse.json({ ok: false, error: err.message }, { status: 500 });
+    console.error("❌ /api/public/availability failed:", err?.message || err);
+    return NextResponse.json(
+      { ok: false, error: err?.message || "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
