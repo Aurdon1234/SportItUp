@@ -58,71 +58,56 @@
 
 // app/api/public/availability/route.js
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { getSheetsClient } from "@/lib/google-sheets";
 
 export async function GET(req) {
   try {
-    console.log("🟢 /api/public/availability called");
+    console.log("🟢 /api/public/availability called (Google Sheets mode)");
 
     const { searchParams } = new URL(req.url);
     const turfId = searchParams.get("turfId");
     const date = searchParams.get("date");
 
     if (!turfId || !date) {
-      console.warn("⚠️ Missing params", { turfId, date });
-      return NextResponse.json(
-        { ok: false, error: "Missing turfId or date" },
-        { status: 400 }
-      );
+      return NextResponse.json({ ok: false, error: "Missing turfId or date" }, { status: 400 });
     }
 
-    // ✅ Verify environment variables exist
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key =
-      process.env.SUPABASE_SERVICE_ROLE_KEY ||
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const sheets = await getSheetsClient();
+    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
+    const sheetTitle = process.env.GOOGLE_SHEETS_SHEET_TITLE || "Bookings";
 
-    if (!url || !key) {
-      console.error("❌ Supabase env vars missing:", {
-        url: !!url,
-        key: !!key,
-      });
-      return NextResponse.json(
-        { ok: false, error: "Supabase environment variables not set" },
-        { status: 500 }
-      );
-    }
-
-    // ✅ Initialize client safely
-    const supabase = createClient(url, key, {
-      auth: { persistSession: false },
+    // Read all rows from the sheet
+    const range = `${sheetTitle}!A2:Z`; // skip header row
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range,
     });
 
-    console.log("🔍 Querying bookings for", { turfId, date });
+    const rows = response.data.values || [];
 
-    const { data, error } = await supabase
-      .from("bookings")
-      .select("time_slot")
-      .eq("turf_id", turfId)
-      .eq("date", date);
+    // Adjust columns based on how your sheet stores them
+    // Example columns: Timestamp | Name | Phone | Email | Venue | Date | TimeSlot | ...
+    const bookedSlots = rows
+      .filter((r) => {
+        const venue = (r[4] || "").trim().toLowerCase();
+        const bookingDate = (r[5] || "").trim(); // your Date column
+        return venue.includes(turfId.toLowerCase()) && bookingDate === date;
+      })
+      .flatMap((r) => {
+        const slotString = r[6] || ""; // TimeSlot column
+        return slotString
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
+      });
 
-    if (error) {
-      console.error("❌ Supabase query failed:", error.message);
-      return NextResponse.json(
-        { ok: false, error: error.message },
-        { status: 500 }
-      );
-    }
+    const blockedHours = [...new Set(bookedSlots)];
 
-    const blockedHours = (data ?? []).map((r) => r.time_slot);
-    console.log("✅ Returning blocked hours:", blockedHours);
+    console.log("✅ Blocked hours from Sheet:", blockedHours);
 
     return NextResponse.json({ ok: true, blockedHours });
   } catch (err) {
-    console.error("❌ /availability internal error:", err);
-    return NextResponse.json(
-      { ok: false, error: err.message || "Internal Server Error" },
-      { status: 500 }
-    );
+    console.error("/api/public/availability failed:", err);
+    return NextResponse.json({ ok: false, error: err.message }, { status: 500 });
   }
 }
