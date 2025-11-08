@@ -107,7 +107,7 @@ import { NextResponse } from "next/server";
 import { getSheetsClient } from "@/lib/google-sheets";
 import { store, turfOwners } from "@/lib/store";
 
-/** Convert "06:00" -> "06:00-07:00" (optional for in-memory store) */
+/** Convert "06:00" -> "06:00-07:00" for in-memory block representation */
 function timeToRange(hourHHMM) {
   const [h, m] = hourHHMM.split(":").map(Number);
   const endH = String((h + 1) % 24).padStart(2, "0");
@@ -120,7 +120,6 @@ export async function POST(req) {
 
     const body = await req.json().catch(() => null);
     if (!body) {
-      console.warn("⚠️ booking confirm: invalid or missing JSON body");
       return NextResponse.json({ ok: false, error: "Invalid JSON body" }, { status: 400 });
     }
 
@@ -128,81 +127,70 @@ export async function POST(req) {
       name, phone, email,
       totalAmount, advanceAmount, remainingAmount,
       turfId, turfName, location, city, sport,
-      date, // YYYY-MM-DD
-      timeSlots = [], // ["06:00","07:00"]
+      date, timeSlots = [],
       paymentMethod, paymentMeta = {},
     } = body;
 
     if (!turfId || !date || !Array.isArray(timeSlots) || timeSlots.length === 0) {
-      return NextResponse.json({ ok: false, error: "Missing turfId, date or timeSlots" }, { status: 400 });
+      return NextResponse.json(
+        { ok: false, error: "Missing turfId, date or timeSlots" },
+        { status: 400 }
+      );
     }
 
-    const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
-    const sheetTitle = process.env.GOOGLE_SHEETS_SHEET_TITLE || "Bookings";
-    if (!spreadsheetId) {
-      console.error("❌ GOOGLE_SHEET_ID not set");
-      return NextResponse.json({ ok: false, error: "Server misconfiguration: GOOGLE_SHEET_ID missing" }, { status: 500 });
-    }
-
-    // getSheetsClient -> must return google.sheets client
-    let sheets;
+    // Get Sheets client (the new helper returns { sheets, spreadsheetId, sheetTitle })
+    let client;
     try {
-      sheets = await getSheetsClient();
-      if (!sheets || typeof sheets.spreadsheets?.values?.get !== "function") {
-        console.error("❌ getSheetsClient returned an invalid sheets client:", { sheetsAvailable: !!sheets });
-        return NextResponse.json({ ok: false, error: "Google Sheets client invalid" }, { status: 500 });
-      }
+      client = await getSheetsClient();
     } catch (err) {
-      console.error("❌ getSheetsClient failed:", err && err.message ? err.message : err);
+      console.error("❌ getSheetsClient failed:", err?.message || err);
       return NextResponse.json({ ok: false, error: "Failed to initialize Google Sheets client" }, { status: 500 });
     }
 
-    // Read existing rows
+    if (!client?.sheets || !client.spreadsheetId) {
+      console.error("❌ getSheetsClient returned incomplete client:", client);
+      return NextResponse.json({ ok: false, error: "Google Sheets client invalid" }, { status: 500 });
+    }
+
+    const { sheets, spreadsheetId, sheetTitle } = client;
+
+    // Read existing bookings
     const readRange = `${sheetTitle}!A2:Z`;
-    let readRes;
+    let rows = [];
     try {
-      readRes = await sheets.spreadsheets.values.get({
+      const readRes = await sheets.spreadsheets.values.get({
         spreadsheetId,
         range: readRange,
       });
+      rows = readRes?.data?.values || [];
     } catch (err) {
-      console.error("❌ Google Sheets API call failed (spreadsheets.values.get):", err && err.message ? err.message : err);
-      return NextResponse.json({ ok: false, error: "Failed to read bookings sheet (Sheets API error)" }, { status: 500 });
+      console.error("❌ Google Sheets read failed:", err?.message || err);
+      return NextResponse.json({ ok: false, error: "Failed to read bookings sheet" }, { status: 500 });
     }
 
-    // Defensive check
-    if (!readRes || !readRes.data) {
-      console.error("❌ Google Sheets read response is empty or malformed:", { readRes });
-      return NextResponse.json({ ok: false, error: "Empty response from Sheets API" }, { status: 500 });
-    }
-
-    const rows = readRes.data.values || [];
-
-    // Column indexes (0-based). Adjust to match your sheet.
+    // Match existing bookings for this turf/date
     const VENUE_COL = 4; // E
     const DATE_COL = 5; // F
     const TIMESLOT_COL = 6; // G
 
-    // Build existing slots for same turf/date
     const existingSlots = rows
       .filter((r) => {
-        const venueCell = (r[VENUE_COL] || "").toString().trim().toLowerCase();
-        const bookingDate = (r[DATE_COL] || "").toString().trim();
-        if (!bookingDate) return false;
-        const matchesVenue = turfId && venueCell.includes(String(turfId).toLowerCase());
-        const matchesName = turfName && venueCell.includes(String(turfName).toLowerCase());
-        return bookingDate === date && (matchesVenue || matchesName);
+        const venueCell = (r[VENUE_COL] || "").toLowerCase();
+        const bookingDate = (r[DATE_COL] || "").trim();
+        const matchVenue =
+          venueCell.includes(turfId.toLowerCase()) ||
+          (turfName && venueCell.includes(turfName.toLowerCase()));
+        return bookingDate === date && matchVenue;
       })
-      .flatMap((r) => {
-        const ts = (r[TIMESLOT_COL] || "").toString();
-        return ts.split(",").map((s) => s.trim()).filter(Boolean);
-      });
+      .flatMap((r) => (r[TIMESLOT_COL] || "").split(",").map((s) => s.trim()).filter(Boolean));
 
-    const existingSet = new Set(existingSlots);
-    const conflictingSlots = timeSlots.filter((t) => existingSet.has(t));
-    if (conflictingSlots.length > 0) {
-      console.warn("⚠️ Booking conflict detected (sheet):", conflictingSlots);
-      return NextResponse.json({ ok: false, error: "Some slots already booked", conflicts: conflictingSlots }, { status: 409 });
+    const conflicting = timeSlots.filter((t) => existingSlots.includes(t));
+    if (conflicting.length > 0) {
+      console.warn("⚠️ Booking conflict detected:", conflicting);
+      return NextResponse.json(
+        { ok: false, error: "Some slots already booked", conflicts: conflicting },
+        { status: 409 }
+      );
     }
 
     // Append booking
@@ -216,9 +204,9 @@ export async function POST(req) {
         turfName || location || turfId || "Venue",
         date,
         timeSlots.join(", "),
-        typeof totalAmount === "number" ? totalAmount : (totalAmount ?? ""),
-        typeof advanceAmount === "number" ? advanceAmount : (advanceAmount ?? ""),
-        typeof remainingAmount === "number" ? remainingAmount : (remainingAmount ?? ""),
+        typeof totalAmount === "number" ? totalAmount : totalAmount || "",
+        typeof advanceAmount === "number" ? advanceAmount : advanceAmount || "",
+        typeof remainingAmount === "number" ? remainingAmount : remainingAmount || "",
         paymentMethod || "",
         JSON.stringify(paymentMeta || {}),
       ],
@@ -231,43 +219,35 @@ export async function POST(req) {
         valueInputOption: "RAW",
         requestBody: { values: appendValues },
       });
-      console.log("✅ Booking appended to Google Sheet:", { turfId, date, timeSlots });
+      console.log("✅ Booking added to Google Sheet:", { turfId, date, timeSlots });
     } catch (err) {
-      console.error("❌ Failed to append booking to sheet:", err && err.message ? err.message : err);
+      console.error("❌ Append to Google Sheets failed:", err?.message || err);
       return NextResponse.json({ ok: false, error: "Failed to write booking to sheet" }, { status: 500 });
     }
 
-    // Optional in-memory store update
+    // Update local memory store (non-critical)
     try {
-      const ownerId = (turfOwners && turfOwners[turfId]) || "owner-1";
-      const normalizedRanges = timeSlots.map((t) => (t.includes("-") ? t : timeToRange(t)));
-      if (store && Array.isArray(store.blocks)) {
-        normalizedRanges.forEach((range) => {
-          store.blocks.push({ ownerId, date, slot: range });
-        });
-      }
-      if (store && Array.isArray(store.bookings)) {
-        const id = `b_${Date.now().toString(36)}`;
-        store.bookings.push({
-          id,
-          ownerId,
-          date,
-          time: normalizedRanges.join(", "),
-          sport: sport || "-",
-          customer: name || "Online Customer",
-          status: "active",
-          amount: typeof advanceAmount === "number" ? advanceAmount : undefined,
-          source: "online",
-        });
-      }
-      console.log("ℹ️ In-memory store updated (if present)");
+      const ownerId = turfOwners?.[turfId] || "owner-1";
+      const ranges = timeSlots.map((t) => (t.includes("-") ? t : timeToRange(t)));
+      store.blocks?.push(...ranges.map((slot) => ({ ownerId, date, slot })));
+      store.bookings?.push({
+        id: `b_${Date.now().toString(36)}`,
+        ownerId,
+        date,
+        time: ranges.join(", "),
+        sport: sport || "-",
+        customer: name || "Online Customer",
+        status: "active",
+        amount: advanceAmount ?? undefined,
+        source: "online",
+      });
     } catch (err) {
-      console.warn("⚠️ Failed to update in-memory store:", err && err.message ? err.message : err);
+      console.warn("⚠️ Failed to update in-memory store:", err?.message || err);
     }
 
     return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error("❌ Uncaught error in booking confirm route:", err && err.message ? err.message : err);
-    return NextResponse.json({ ok: false, error: err.message || "Failed to confirm booking" }, { status: 500 });
+    console.error("❌ Uncaught error in booking confirm route:", err?.message || err);
+    return NextResponse.json({ ok: false, error: err?.message || "Internal error" }, { status: 500 });
   }
 }
