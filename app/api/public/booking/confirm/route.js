@@ -151,7 +151,7 @@ export async function POST(req) {
     }
 
     // check env
-    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
+    const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
     const sheetTitle = process.env.GOOGLE_SHEETS_SHEET_TITLE || "Bookings";
     if (!spreadsheetId) {
       console.error("❌ GOOGLE_SHEET_ID not set");
