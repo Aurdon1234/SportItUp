@@ -914,55 +914,55 @@ export default function PaymentPage() {
   };
 
   // Call server to confirm booking AFTER successful payment
-  // async function confirmBookingOnServer(paymentMeta) {
-  //   try {
-  //     setConfirmError(null);
-  //     setIsConfirming(true);
+  async function confirmBookingOnServer(paymentMeta) {
+    try {
+      setConfirmError(null);
+      setIsConfirming(true);
 
-  //     const dateStr =
-  //       booking?.date instanceof Date
-  //         ? booking.date.toISOString().split("T")[0]
-  //         : booking?.date || "";
+      const dateStr =
+        booking?.date instanceof Date
+          ? booking.date.toISOString().split("T")[0]
+          : booking?.date || "";
 
-  //     const payload = {
-  //       // who & how much
-  //       name: customer.name,
-  //       phone: customer.phone,
-  //       email: customer.email,
-  //       totalAmount,
-  //       advanceAmount,
-  //       remainingAmount,
+      const payload = {
+        // who & how much
+        name: customer.name,
+        phone: customer.phone,
+        email: customer.email,
+        totalAmount,
+        advanceAmount,
+        remainingAmount,
 
-  //       // what & when
-  //       turfId: booking?.turfId || "",
-  //       turfName: booking?.turfName || "Venue",
-  //       location: booking?.location || "-",
-  //       date: dateStr,
-  //       timeSlots,
+        // what & when
+        turfId: booking?.turfId || "",
+        turfName: booking?.turfName || "Venue",
+        location: booking?.location || "-",
+        date: dateStr,
+        timeSlots,
 
-  //       // meta
-  //       sport: booking?.sport || "",
-  //       city: booking?.city || "",
-  //       paymentMethod,
-  //       paymentMeta, // includes razorpay ids or "simulated" flag
-  //     };
+        // meta
+        sport: booking?.sport || "",
+        city: booking?.city || "",
+        paymentMethod,
+        paymentMeta, // includes razorpay ids or "simulated" flag
+      };
 
-  //     const res = await fetch("/api/public/booking/confirm", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify(payload),
-  //     });
+      const res = await fetch("/api/public/booking/confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-  //     if (!res.ok) {
-  //       const msg = await res.text();
-  //       throw new Error(msg || "Failed to record booking");
-  //     }
-  //   } catch (e) {
-  //     setConfirmError(e.message || "Failed to record booking");
-  //   } finally {
-  //     setIsConfirming(false);
-  //   }
-  // }
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(msg || "Failed to record booking");
+      }
+    } catch (e) {
+      setConfirmError(e.message || "Failed to record booking");
+    } finally {
+      setIsConfirming(false);
+    }
+  }
 
   const handlePayment = async () => {
     setIsProcessing(true);
