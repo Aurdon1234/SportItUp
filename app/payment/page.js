@@ -963,62 +963,6 @@ export default function PaymentPage() {
   //     setIsConfirming(false);
   //   }
   // }
-  // Call server to confirm booking AFTER successful payment
-async function confirmBookingOnServer(paymentMeta) {
-  try {
-    setConfirmError(null);
-    setIsConfirming(true);
-
-    const dateStr =
-      booking?.date instanceof Date
-        ? booking.date.toISOString().split("T")[0]
-        : booking?.date || "";
-
-    const payload = {
-      // who & how much
-      name: customer.name,
-      phone: customer.phone,
-      email: customer.email,
-      totalAmount,
-      advanceAmount,
-      remainingAmount,
-
-      // what & when
-      turfId: booking?.turfId || "",
-      turfName: booking?.turfName || "Venue",
-      location: booking?.location || "-",
-      date: dateStr,
-      timeSlots,
-
-      // meta
-      sport: booking?.sport || "",
-      city: booking?.city || "",
-      paymentMethod,
-      paymentMeta, // includes razorpay ids or "simulated" flag
-    };
-
-    const res = await fetch("/api/public/booking/confirm", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    if (!res.ok) {
-      const msg = await res.text();
-      throw new Error(msg || "Failed to record booking");
-    }
-
-    // success
-    return true;
-  } catch (e) {
-    setConfirmError(e.message || "Failed to record booking");
-    console.error("[payment] confirmBookingOnServer error:", e);
-    return false;
-  } finally {
-    setIsConfirming(false);
-  }
-}
-
 
   const handlePayment = async () => {
     setIsProcessing(true);
@@ -1085,44 +1029,19 @@ async function confirmBookingOnServer(paymentMeta) {
           description: `Booking: ${booking?.turfName || "Venue"}`,
           image: "/placeholder.svg",
           order_id: order.id,
-          // handler: async (response) => {
-          //   // Payment succeeded -> record booking on server, THEN show success
-          //   await confirmBookingOnServer({
-          //     provider: "razorpay",
-          //     orderId: order.id,
-          //     amountInPaise: order.amountInPaise || order.amount,
-          //     payment_id: response?.razorpay_payment_id,
-          //     razorpay_order_id: response?.razorpay_order_id,
-          //     razorpay_signature: response?.razorpay_signature,
-          //   });
-          //   setIsProcessing(false);
-          //   setPaymentSuccess(true);
-          // },
           handler: async (response) => {
-  // Payment succeeded -> record booking on server, THEN redirect to booking page to refresh availability
-  const success = await confirmBookingOnServer({
-    provider: "razorpay",
-    orderId: order.id,
-    amountInPaise: order.amountInPaise || order.amount,
-    payment_id: response?.razorpay_payment_id,
-    razorpay_order_id: response?.razorpay_order_id,
-    razorpay_signature: response?.razorpay_signature,
-  });
-
-  setIsProcessing(false);
-
-  if (success) {
-    // Redirect back to booking page and trigger availability refresh there
-    const turfId = booking?.turfId || "";
-    // include a 'success' flag if you want to show a toast on the booking page
-    window.location.href = `/booking/${encodeURIComponent(turfId)}?refresh=true`;
-  } else {
-    // Show the payment success screen but notify user there's a logging problem
-    setPaymentSuccess(true);
-    // confirmError will already be set by confirmBookingOnServer
-  }
-},
-
+            // Payment succeeded -> record booking on server, THEN show success
+            await confirmBookingOnServer({
+              provider: "razorpay",
+              orderId: order.id,
+              amountInPaise: order.amountInPaise || order.amount,
+              payment_id: response?.razorpay_payment_id,
+              razorpay_order_id: response?.razorpay_order_id,
+              razorpay_signature: response?.razorpay_signature,
+            });
+            setIsProcessing(false);
+            setPaymentSuccess(true);
+          },
           prefill: {
             name: customer.name,
             email: customer.email,
@@ -1140,33 +1059,15 @@ async function confirmBookingOnServer(paymentMeta) {
       }
 
       // Simulate success for UPI/Card/Wallet paths → then confirm on server
-      // setTimeout(async () => {
-      //   await confirmBookingOnServer({
-      //     provider: paymentMethod,
-      //     simulated: true,
-      //     amount: advanceAmount,
-      //   });
-      //   setIsProcessing(false);
-      //   setPaymentSuccess(true);
-      // }, 1000);
-      // Simulate success for UPI/Card/Wallet paths → then confirm on server and redirect
-setTimeout(async () => {
-  const success = await confirmBookingOnServer({
-    provider: paymentMethod,
-    simulated: true,
-    amount: advanceAmount,
-  });
-  setIsProcessing(false);
-
-  if (success) {
-    const turfId = booking?.turfId || "";
-    window.location.href = `/booking/${encodeURIComponent(turfId)}?refresh=true`;
-  } else {
-    // fallback: show success screen but surface confirmError
-    setPaymentSuccess(true);
-  }
-}, 1000);
-
+      setTimeout(async () => {
+        await confirmBookingOnServer({
+          provider: paymentMethod,
+          simulated: true,
+          amount: advanceAmount,
+        });
+        setIsProcessing(false);
+        setPaymentSuccess(true);
+      }, 1000);
     } catch (err) {
       console.error("[payment] error:", err);
       alert(err?.message || "Payment failed");
