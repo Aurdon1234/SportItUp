@@ -666,10 +666,33 @@ export default function BookingPage() {
    * Step 3: Fetch availability from API (Google Sheets). We revalidate every 4s.
    * avail => { ok: true, blockedHours: ["08:00","09:00"] }
    */
-  const { data: avail, error: availError } = useSWR(availabilityUrl, fetcher, {
-    refreshInterval: 4000,
-    revalidateOnFocus: false,
-  });
+
+const { data: avail, isLoading } = useSWR(
+  availabilityUrl,
+  async (url) => {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Failed to fetch availability");
+    return res.json();
+  },
+  {
+    refreshInterval: 8000, // auto-refresh every 8 seconds
+    revalidateOnFocus: true, // refresh when user returns to tab
+  }
+);
+
+const search = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+useEffect(() => {
+  if (search?.get("refresh") === "true") {
+    mutate(availabilityUrl);
+    window.history.replaceState(null, "", window.location.pathname); // clean URL
+  }
+}, [availabilityUrl]);
+
+// Manual refresh trigger when booking completes
+const refreshAvailability = () => {
+  if (availabilityUrl) mutate(availabilityUrl);
+};
+
 
   // set of blocked times from sheet (fast lookup in UI)
   const blockedHours = useMemo(() => new Set(avail?.blockedHours || []), [avail]);
@@ -750,6 +773,9 @@ export default function BookingPage() {
 
     // navigate to payment with booking payload
     window.location.href = `/payment?${queryParams}`;
+
+    refreshAvailability();
+
   };
 
   return (
