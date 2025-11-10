@@ -872,12 +872,39 @@ export default function PaymentPage() {
   const confirmationRef = useRef(null);
 
   useEffect(() => {
+  const setupRecaptcha = async () => {
+    // Make sure this runs only in the browser
+    if (typeof window === "undefined") return;
+
+    // Wait a bit to ensure auth is initialized
     if (!auth) return;
-    if (!recaptchaRef.current) {
-      recaptchaRef.current = new RecaptchaVerifier("recaptcha-container", { size: "invisible" }, auth);
-      recaptchaRef.current.render().catch(() => {});
+
+    try {
+      if (!recaptchaRef.current) {
+        recaptchaRef.current = new RecaptchaVerifier(
+          auth,
+          "recaptcha-container",
+          {
+            size: "invisible",
+            callback: (response) => {
+              console.log("Recaptcha solved", response);
+            },
+            "expired-callback": () => {
+              console.warn("Recaptcha expired, will reinitialize");
+            },
+          }
+        );
+        await recaptchaRef.current.render();
+        console.log("✅ Recaptcha initialized");
+      }
+    } catch (err) {
+      console.error("Recaptcha init failed:", err);
     }
-  }, [auth]);
+  };
+
+  setupRecaptcha();
+}, [auth]);
+
 
   const handleSendOtp = async () => {
     if (!customer.phone) {
