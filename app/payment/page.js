@@ -1305,7 +1305,7 @@ export default function PaymentPage() {
 
                 {!detailsSaved ? (
                   <Button
-  onClick={handleProceedToPayment}
+  onClick={handleSaveDetails}
   disabled={isProcessing || !otpVerified || !customer.phone || !customer.email || !customer.name}
   className={`${otpVerified ? "bg-green-600" : "bg-gray-400 cursor-not-allowed"}`}
 >
