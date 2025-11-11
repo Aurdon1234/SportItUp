@@ -1248,7 +1248,7 @@ export default function PaymentPage() {
     <button
       onClick={async () => {
         setOtpLoading(true);
-        const res = await fetch("/api/send-otp", {
+        const res = await fetch("/api/otp/send-otp", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ phone: customer.phone }),
@@ -1278,7 +1278,7 @@ export default function PaymentPage() {
       />
       <button
         onClick={async () => {
-          const res = await fetch("/api/verify-otp", {
+          const res = await fetch("/api/otp/verify-otp", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ phone: customer.phone, code: otp }),
