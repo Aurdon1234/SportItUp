@@ -2044,7 +2044,7 @@ export default function PaymentPage() {
                     />
                   </div>
                   <div className="space-y-2">
-  <Label htmlFor="custPhone">Phone Number (with OTP Verification)</Label>
+  <Label htmlFor="custPhone">Phone Number</Label>
 
   {/* Firebase Phone OTP UI */}
   <PhoneOTP
