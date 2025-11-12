@@ -23,7 +23,6 @@
 // app/api/otp/send-otp/route.js
 import { randomBytes } from "crypto";
 
-// simple in-memory map for OTP sessions (dev only)
 const OTP_STORE = global.__OTP_STORE ||= new Map();
 const OTP_TTL_MS = 2 * 60 * 1000; // 2 minutes
 
@@ -36,56 +35,64 @@ function generateOtp(len = 6) {
 export async function POST(req) {
   try {
     const { phone } = await req.json();
-    if (!phone) return new Response(JSON.stringify({ ok: false, error: "missing phone" }), { status: 400, headers:{ "Content-Type":"application/json" } });
+    if (!phone) {
+      return new Response(JSON.stringify({ ok: false, error: "missing phone" }), { status: 400, headers: { "Content-Type":"application/json" } });
+    }
 
-    // normalize phone if needed (assume client sends +91... or full E.164)
+    // debug logs (temporary)
+    console.log("RENFLAIR_API_URL:", process.env.RENFLAIR_API_URL);
+    console.log("RENFLAIR_API_KEY loaded:", !!process.env.RENFLAIR_API_KEY);
+    console.log("RENFLAIR_SENDER:", process.env.RENFLAIR_SENDER);
+
     const otp = generateOtp(6);
     const sessionId = randomBytes(12).toString("hex");
     const expiresAt = Date.now() + OTP_TTL_MS;
-
-    // store session (in production use Redis/Vercel KV)
     OTP_STORE.set(sessionId, { phone, otp, expiresAt });
 
-    // Build message
-    const message = `Your SportItUp OTP is ${otp}. It expires in 2 minutes.`;
+    // DEV: print OTP to logs so you can test immediately (remove in production)
+    console.log(`[DEV] OTP for ${phone} = ${otp} (session ${sessionId})`);
 
-    // Call Renflair SMS API
     const RENFLAIR_URL = process.env.RENFLAIR_API_URL;
     const RENFLAIR_KEY = process.env.RENFLAIR_API_KEY;
     const RENFLAIR_SENDER = process.env.RENFLAIR_SENDER || "SPORTUP";
 
     if (!RENFLAIR_URL || !RENFLAIR_KEY) {
-      // If env missing, still return sessionId for dev testing (no SMS)
-      console.warn("Renflair env missing, returning session for dev. Set RENFLAIR_API_URL and RENFLAIR_API_KEY for real SMS.");
-      return new Response(JSON.stringify({ ok: true, sessionId }), { status: 200, headers:{ "Content-Type":"application/json" } });
+      // Running without Renflair configured -> return session for dev testing.
+      return new Response(JSON.stringify({ ok: true, sessionId, note: "dev-mode: renflair not configured" }), { status: 200, headers: { "Content-Type":"application/json" } });
     }
 
-    // Example payload — **adapt this to Renflair docs**.
-    // They may expect form-encoded data or query params, so change accordingly.
-    const payload = {
-      api_key: RENFLAIR_KEY,
-      to: phone,
-      sender: RENFLAIR_SENDER,
-      message,
-    };
+    // Build payload exactly as Renflair expects.
+    // From your ZIP we saw the V1 syntax uses query params: https://sms.renflair.in/V1.php?API=...&PHONE=...&OTP=...
+    const url = new URL(RENFLAIR_URL);
+    url.searchParams.set("API", RENFLAIR_KEY);
+    url.searchParams.set("PHONE", phone);
+    url.searchParams.set("OTP", otp);
+    // If Renflair requires sender or template params, add them:
+    // url.searchParams.set("SENDER", RENFLAIR_SENDER);
 
-    const renRes = await fetch(RENFLAIR_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    console.log("Calling Renflair:", url.toString());
 
-    // read Renflair response for debugging
-    const renJson = await renRes.text(); // parse text to avoid parse errors
+    const renRes = await fetch(url.toString(), { method: "GET" });
+    const renText = await renRes.text();
+    console.log("Renflair HTTP status:", renRes.status, "body:", renText.slice(0, 200));
+
+    // Basic success check: policy depends on Renflair. If renRes.ok and response contains success token, accept it.
     if (!renRes.ok) {
-      console.error("Renflair error:", renRes.status, renJson);
-      return new Response(JSON.stringify({ ok: false, error: "sms_failed", details: renJson }), { status: 502, headers:{ "Content-Type":"application/json" } });
+      console.error("Renflair returned non-OK:", renRes.status, renText);
+      return new Response(JSON.stringify({ ok: false, error: "sms_provider_error", details: renText }), { status: 502, headers: { "Content-Type":"application/json" } });
     }
 
-    // success — return sessionId to client
-    return new Response(JSON.stringify({ ok: true, sessionId }), { status: 200, headers:{ "Content-Type":"application/json" } });
+    // Some gateways return "OK" or numeric code in body. Adjust the check below if Renflair returns JSON.
+    const lower = (renText || "").toLowerCase();
+    if (lower.includes("error") || lower.includes("failed") || lower.includes("invalid")) {
+      console.error("Renflair reported failure:", renText);
+      return new Response(JSON.stringify({ ok: false, error: "sms_provider_rejected", details: renText }), { status: 502, headers: { "Content-Type":"application/json" } });
+    }
+
+    // success
+    return new Response(JSON.stringify({ ok: true, sessionId }), { status: 200, headers: { "Content-Type":"application/json" } });
   } catch (err) {
-    console.error("send-otp error", err);
-    return new Response(JSON.stringify({ ok: false, error: String(err) }), { status: 500, headers:{ "Content-Type":"application/json" } });
+    console.error("send-otp unexpected error:", err);
+    return new Response(JSON.stringify({ ok: false, error: String(err) }), { status: 500, headers: { "Content-Type":"application/json" } });
   }
 }
