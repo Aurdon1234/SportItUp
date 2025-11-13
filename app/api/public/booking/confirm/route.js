@@ -1,107 +1,3 @@
-// import { NextResponse } from "next/server";
-// import { appendBookingRow } from "@/lib/google-sheets";
-// import { store, turfOwners } from "@/lib/store";
-// import { getSupabaseServerClient } from "@/lib/supabase/server";
-
-// // Utility: "06:00" -> "06:00-07:00"
-// function timeToRange(hourHHMM) {
-//   const [h, m] = hourHHMM.split(":").map(Number);
-//   const endH = String((h + 1) % 24).padStart(2, "0");
-//   return `${String(h).padStart(2, "0")}:${m.toString().padStart(2, "0")}-${endH}:${m.toString().padStart(2, "0")}`;
-// }
-
-// export async function POST(req) {
-//   try {
-//     const body = await req.json().catch(() => null);
-//     if (!body) return NextResponse.json({ ok: false, error: "Invalid JSON" }, { status: 400 });
-
-//     const {
-//       // who & how much
-//       name, phone, email,
-//       totalAmount, advanceAmount, remainingAmount,
-
-//       // what & when
-//       turfId, turfName, location, city, sport,
-//       date,               // "YYYY-MM-DD"
-//       timeSlots = [],     // ["06:00","07:00",...]
-
-//       // meta
-//       paymentMethod,      // "razorpay" | "upi" | "card" | "wallet"
-//       paymentMeta = {},   // provider ids, signature, or simulated flag
-//     } = body;
-
-//     if (!turfId || !date || !Array.isArray(timeSlots) || timeSlots.length === 0) {
-//       return NextResponse.json({ ok: false, error: "Missing turfId/date/timeSlots" }, { status: 400 });
-//     }
-
-//     const ownerId = turfOwners[turfId] || "owner-1";
-
-//     // 1) Append a row to Google Sheets (confirmed bookings only)
-//     await appendBookingRow({
-//       timestampISO: new Date().toISOString(),
-//       name: name || "Online Customer",
-//       phone: phone || "",
-//       email: email || "",
-//       venue: turfName || location || "Venue",
-//       date,                                      // YYYY-MM-DD
-//       timeSlot: timeSlots.join(", "),            // human readable
-//       durationHours: timeSlots.length,
-//       totalAmount: typeof totalAmount === "number" ? totalAmount : "",
-//       notes: `Advance: ₹${advanceAmount ?? ""}, Remaining: ₹${remainingAmount ?? ""}, Method: ${paymentMethod || "-"}, Meta: ${JSON.stringify(paymentMeta)}`,
-//       sheetTitle: process.env.GOOGLE_SHEETS_SHEET_TITLE || "Bookings",
-//     });
-
-//     // 2) Block the selected slots in memory so they don’t appear available
-//     const normalizedRanges = timeSlots.map(t => (t.includes("-") ? t : timeToRange(t)));
-//     normalizedRanges.forEach(range => {
-//       store.blocks.push({ ownerId, date, slot: range });
-//     });
-
-//     // 3) (Optional) Persist to Supabase for real storage
-//     //    Uncomment if you have a "bookings" table ready.
-//     // const supabase = getSupabaseServerClient({ useServiceRole: true });
-//     // for (const t of timeSlots) {
-//     //   await supabase.from("bookings").insert({
-//     //     turf_id: turfId,
-//     //     date,
-//     //     time_slot: t, // store as "06:00" or range, but be consistent with your availability reader
-//     //     name,
-//     //     phone,
-//     //     email,
-//     //     venue: turfName || location || "Venue",
-//     //     sport: sport || null,
-//     //     city: city || null,
-//     //     amount_total: totalAmount ?? null,
-//     //     amount_advance: advanceAmount ?? null,
-//     //     provider: paymentMeta?.provider || paymentMethod || "unknown",
-//     //     provider_payment_id: paymentMeta?.payment_id || null,
-//     //     provider_order_id: paymentMeta?.razorpay_order_id || null,
-//     //     provider_signature: paymentMeta?.razorpay_signature || null,
-//     //     status: "confirmed",
-//     //     source: "online",
-//     //   });
-//     // }
-
-//     // 4) Mirror the booking in the in-memory store (useful for your existing admin views)
-//     const id = `b_${Date.now().toString(36)}`;
-//     store.bookings.push({
-//       id,
-//       ownerId,
-//       date,
-//       time: normalizedRanges.join(", "),
-//       sport: sport || "-",
-//       customer: name || "Online Customer",
-//       status: "active",
-//       amount: typeof advanceAmount === "number" ? advanceAmount : undefined, // what was actually paid now
-//       source: "online",
-//     });
-
-//     return NextResponse.json({ ok: true, id });
-//   } catch (e) {
-//     return NextResponse.json({ ok: false, error: e.message || "Failed to confirm booking" }, { status: 500 });
-//   }
-// }
-
 // app/api/public/booking/confirm/route.js
 import { NextResponse } from "next/server";
 import { getSheetsClient } from "@/lib/google-sheets";
@@ -109,17 +5,83 @@ import { store, turfOwners } from "@/lib/store";
 
 /** Convert "06:00" -> "06:00-07:00" for in-memory block representation */
 function timeToRange(hourHHMM) {
-  const [h, m] = hourHHMM.split(":").map(Number);
-  const endH = String((h + 1) % 24).padStart(2, "0");
-  return `${String(h).padStart(2, "0")}:${m.toString().padStart(2, "0")}-${endH}:${m.toString().padStart(2, "0")}`;
+  const [hStr, mStr] = hourHHMM.split(":").map((v) => v || "0");
+  const h = Number(hStr);
+  const m = Number(mStr || 0);
+  const endH = (h + 1) % 24;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}-${String(endH).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+/** Normalize many common time formats to "HH:MM" 24-hour string, or null if unparseable */
+function normalizeTimeToHHMM(raw) {
+  if (raw === undefined || raw === null) return null;
+  let s = String(raw).trim();
+  if (!s) return null;
+
+  // unify separators and remove extra whitespace
+  s = s.replace(/\s+/g, " ").replace(/\./g, ":").toLowerCase();
+
+  // match "h", "hh", "h:mm", "hh:mm", optionally with am/pm
+  const ampmMatch = s.match(/^(\d{1,2})(?::(\d{1,2}))?\s*(am|pm)?$/i);
+  if (ampmMatch) {
+    let hour = parseInt(ampmMatch[1], 10);
+    let minutes = ampmMatch[2] ? parseInt(ampmMatch[2], 10) : 0;
+    const ampm = ampmMatch[3] ? ampmMatch[3].toLowerCase() : null;
+
+    if (ampm === "pm" && hour !== 12) hour += 12;
+    if (ampm === "am" && hour === 12) hour = 0;
+
+    if (Number.isNaN(hour) || hour < 0 || hour > 23) return null;
+    if (Number.isNaN(minutes) || minutes < 0 || minutes > 59) minutes = 0;
+    return `${String(hour).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+  }
+
+  // match "hh:mm" or "h:mm"
+  const hm = s.match(/^(\d{1,2}):(\d{2})$/);
+  if (hm) {
+    let hh = parseInt(hm[1], 10);
+    let mm = parseInt(hm[2], 10);
+    if (Number.isNaN(hh) || Number.isNaN(mm) || hh < 0 || hh > 23 || mm < 0 || mm > 59) return null;
+    return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+  }
+
+  // match "0700" or "700"
+  const digits = s.match(/^(\d{3,4})$/);
+  if (digits) {
+    const d = digits[1];
+    const hh = d.length === 3 ? parseInt(d.slice(0, 1), 10) : parseInt(d.slice(0, 2), 10);
+    const mm = d.length === 3 ? parseInt(d.slice(1), 10) : parseInt(d.slice(2), 10);
+    if (Number.isNaN(hh) || Number.isNaN(mm)) return null;
+    if (hh < 0 || hh > 23 || mm < 0 || mm > 59) return null;
+    return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+  }
+
+  return null;
+}
+
+/** Helper: given a cell that may contain multiple times, return normalized HH:MM array */
+function extractTimesFromCell(cellValue) {
+  if (!cellValue) return [];
+  // split by comma/semicolon/pipe/newline
+  const parts = String(cellValue).split(/[,;|\n]/).map((p) => p.trim()).filter(Boolean);
+  const out = [];
+  for (const p of parts) {
+    const norm = normalizeTimeToHHMM(p) || p.trim();
+    if (norm) out.push(norm);
+  }
+  return out;
 }
 
 export async function POST(req) {
   try {
     console.log("🟢 /api/public/booking/confirm called (Google Sheets)");
 
-    const body = await req.json().catch(() => null);
-    if (!body) {
+    // parse body safely
+    let body;
+    try {
+      body = await req.json();
+    } catch (e) {
+      console.warn("Invalid JSON body:", e);
       return NextResponse.json({ ok: false, error: "Invalid JSON body" }, { status: 400 });
     }
 
@@ -129,16 +91,13 @@ export async function POST(req) {
       turfId, turfName, location, city, sport,
       date, timeSlots = [],
       paymentMethod, paymentMeta = {},
-    } = body;
+    } = body || {};
 
     if (!turfId || !date || !Array.isArray(timeSlots) || timeSlots.length === 0) {
-      return NextResponse.json(
-        { ok: false, error: "Missing turfId, date or timeSlots" },
-        { status: 400 }
-      );
+      return NextResponse.json({ ok: false, error: "Missing turfId, date or timeSlots" }, { status: 400 });
     }
 
-    // Get Sheets client (the new helper returns { sheets, spreadsheetId, sheetTitle })
+    // initialize sheets client
     let client;
     try {
       client = await getSheetsClient();
@@ -154,46 +113,78 @@ export async function POST(req) {
 
     const { sheets, spreadsheetId, sheetTitle } = client;
 
-    // Read existing bookings
-    const readRange = `${sheetTitle}!A2:Z`;
+    // Read the sheet header + rows
+    const readRange = `${sheetTitle}!A1:Z`;
     let rows = [];
     try {
-      const readRes = await sheets.spreadsheets.values.get({
-        spreadsheetId,
-        range: readRange,
-      });
+      const readRes = await sheets.spreadsheets.values.get({ spreadsheetId, range: readRange });
       rows = readRes?.data?.values || [];
     } catch (err) {
       console.error("❌ Google Sheets read failed:", err?.message || err);
       return NextResponse.json({ ok: false, error: "Failed to read bookings sheet" }, { status: 500 });
     }
 
-    // Match existing bookings for this turf/date
-    const VENUE_COL = 4; // E
-    const DATE_COL = 5; // F
-    const TIMESLOT_COL = 6; // G
-
-    const existingSlots = rows
-      .filter((r) => {
-        const venueCell = (r[VENUE_COL] || "").toLowerCase();
-        const bookingDate = (r[DATE_COL] || "").trim();
-        const matchVenue =
-          venueCell.includes(turfId.toLowerCase()) ||
-          (turfName && venueCell.includes(turfName.toLowerCase()));
-        return bookingDate === date && matchVenue;
-      })
-      .flatMap((r) => (r[TIMESLOT_COL] || "").split(",").map((s) => s.trim()).filter(Boolean));
-
-    const conflicting = timeSlots.filter((t) => existingSlots.includes(t));
-    if (conflicting.length > 0) {
-      console.warn("⚠️ Booking conflict detected:", conflicting);
-      return NextResponse.json(
-        { ok: false, error: "Some slots already booked", conflicts: conflicting },
-        { status: 409 }
-      );
+    if (!rows || rows.length === 0) {
+      // No header/rows -> OK to append (but still continue)
+      rows = [];
     }
 
-    // Append booking
+    // Try to detect header indices (case-insensitive)
+    const header = rows[0] ? rows[0].map((c) => (c || "").toString().trim().toLowerCase()) : [];
+    const venueIdx = header.findIndex((h) => ["turf", "turfid", "turf_id", "venue", "venue_name", "venue name", "slug"].includes(h));
+    const dateIdx = header.findIndex((h) => ["date", "bookingdate", "booking date"].includes(h));
+    const timeIdx = header.findIndex((h) => ["time", "timeslot", "time slot", "slot", "slots"].includes(h));
+
+    // sensible fallbacks (0-based indices)
+    const VENUE_COL = venueIdx >= 0 ? venueIdx : 4; // fallback to column E (index 4)
+    const DATE_COL = dateIdx >= 0 ? dateIdx : 5; // fallback to column F (index 5)
+    const TIMESLOT_COL = timeIdx >= 0 ? timeIdx : 6; // fallback to column G (index 6)
+
+    // build list of existing booked times for this turf + date
+    // iterate rows starting after header (if header exists)
+    const startRow = header.length ? 1 : 0;
+    const existingSlots = [];
+
+    for (let i = startRow; i < rows.length; i++) {
+      const r = rows[i] || [];
+      const venueCell = (r[VENUE_COL] || "").toString().trim().toLowerCase();
+      const dateCell = (r[DATE_COL] || "").toString().trim();
+      const timesCell = r[TIMESLOT_COL] || "";
+
+      if (!venueCell || !dateCell || !timesCell) continue;
+
+      // match turf: allow turfId or turfName substring match (case-insensitive)
+      const turfLower = turfId.toString().toLowerCase();
+      const turfNameLower = (turfName || "").toString().toLowerCase();
+
+      const matchVenue = venueCell.includes(turfLower) || (turfNameLower && venueCell.includes(turfNameLower));
+      if (!matchVenue) continue;
+      if (dateCell !== date) continue;
+
+      // extract times
+      const times = extractTimesFromCell(timesCell);
+      for (const t of times) existingSlots.push(t);
+    }
+
+    // normalize incoming timeSlots (the ones user selected) to same format
+    const normalizedRequested = timeSlots
+      .map((t) => normalizeTimeToHHMM(t) || String(t).trim())
+      .filter(Boolean);
+
+    // normalize existing slots array
+    const normalizedExisting = existingSlots.map((s) => normalizeTimeToHHMM(s) || String(s).trim());
+
+    // find conflicts (exact match on normalized strings)
+    const conflicts = normalizedRequested.filter((t) => normalizedExisting.includes(t));
+
+    if (conflicts.length > 0) {
+      console.warn("⚠️ Booking conflict detected:", conflicts, { turfId, date });
+      return NextResponse.json({ ok: false, error: "Some slots already booked", conflicts }, { status: 409 });
+    }
+
+    // Prepare append row (normalize times to HH:MM format when possible)
+    const normTimesForWrite = normalizedRequested.map((t) => t).join(", ");
+
     const timestampISO = new Date().toISOString();
     const appendValues = [
       [
@@ -203,7 +194,7 @@ export async function POST(req) {
         email || "",
         turfName || location || turfId || "Venue",
         date,
-        timeSlots.join(", "),
+        normTimesForWrite,
         typeof totalAmount === "number" ? totalAmount : totalAmount || "",
         typeof advanceAmount === "number" ? advanceAmount : advanceAmount || "",
         typeof remainingAmount === "number" ? remainingAmount : remainingAmount || "",
@@ -212,6 +203,7 @@ export async function POST(req) {
       ],
     ];
 
+    // Append to sheet
     try {
       await sheets.spreadsheets.values.append({
         spreadsheetId,
@@ -219,18 +211,20 @@ export async function POST(req) {
         valueInputOption: "RAW",
         requestBody: { values: appendValues },
       });
-      console.log("✅ Booking added to Google Sheet:", { turfId, date, timeSlots });
+      console.log("✅ Booking added to Google Sheet:", { turfId, date, times: normTimesForWrite });
     } catch (err) {
       console.error("❌ Append to Google Sheets failed:", err?.message || err);
       return NextResponse.json({ ok: false, error: "Failed to write booking to sheet" }, { status: 500 });
     }
 
-    // Update local memory store (non-critical)
+    // Update in-memory store (best effort, non-blocking)
     try {
       const ownerId = turfOwners?.[turfId] || "owner-1";
-      const ranges = timeSlots.map((t) => (t.includes("-") ? t : timeToRange(t)));
-      store.blocks?.push(...ranges.map((slot) => ({ ownerId, date, slot })));
-      store.bookings?.push({
+      const ranges = normalizedRequested.map((t) => (t.includes("-") ? t : timeToRange(t)));
+      if (!store.blocks) store.blocks = [];
+      if (!store.bookings) store.bookings = [];
+      store.blocks.push(...ranges.map((slot) => ({ ownerId, date, slot })));
+      store.bookings.push({
         id: `b_${Date.now().toString(36)}`,
         ownerId,
         date,
