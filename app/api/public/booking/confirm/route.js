@@ -98,13 +98,19 @@ export async function POST(req) {
     }
 
     // initialize sheets client
-    let client;
-    try {
-      client = await getSheetsClient();
-    } catch (err) {
-      console.error("❌ getSheetsClient failed:", err?.message || err);
-      return NextResponse.json({ ok: false, error: "Failed to initialize Google Sheets client" }, { status: 500 });
-    }
+    // (inside your route handler)
+let client;
+try {
+  client = await getSheetsClient();
+  if (!client || !client.sheets || !client.spreadsheetId) {
+    console.error("Google sheets client invalid:", client);
+    return NextResponse.json({ ok: false, error: "Google Sheets client not configured" }, { status: 500 });
+  }
+} catch (err) {
+  console.error("Failed to init sheets client:", err);
+  return NextResponse.json({ ok: false, error: "Failed to initialize Google Sheets client" }, { status: 500 });
+}
+
 
     if (!client?.sheets || !client.spreadsheetId) {
       console.error("❌ getSheetsClient returned incomplete client:", client);
