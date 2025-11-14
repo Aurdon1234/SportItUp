@@ -198,7 +198,7 @@ try {
         name || "",
         phone || "",
         email || "",
-        turfName || location || turfId || "Venue",
+        turfId,
         date,
         normTimesForWrite,
         typeof totalAmount === "number" ? totalAmount : totalAmount || "",
