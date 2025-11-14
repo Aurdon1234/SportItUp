@@ -143,7 +143,7 @@ export default function LocationsPage() {
                     , React.createElement('img', {
                       src: location.image || "/placeholder.svg",
                       alt: `${location.name} sports venues`,
-                      className: "w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"     , __self: this, __source: {fileName: _jsxFileName, lineNumber: 141}}
+                      className: "w-full h-60 object-cover group-hover:scale-105 transition-transform duration-300"     , __self: this, __source: {fileName: _jsxFileName, lineNumber: 141}}
                     )
                     , React.createElement('div', { className: "absolute top-3 right-3"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 146}}
                       , React.createElement(Badge, { className: "bg-green-600 text-white" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 147}}, "Available")
