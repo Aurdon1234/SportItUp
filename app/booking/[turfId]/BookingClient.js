@@ -432,7 +432,7 @@ export default function BookingClient({ turfId, initialDate, initialBlockedHours
                           <span className="font-medium">{label}</span>
                           <span className="text-xs text-gray-600">₹{turf.pricePerHour}</span>
                           {slot.peak && <Badge className="absolute -top-1 -right-1 text-xs px-1 py-0 bg-orange-500">Peak</Badge>}
-                          {disabled && <span className="absolute bottom-1 text-[10px] text-gray-600">Booked</span>}
+                          {disabled && <span className="absolute bottom-1 text-[10px] text-gray-600"></span>}
                         </Button>
                       );
                     })}
