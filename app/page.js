@@ -55,53 +55,53 @@ export default function HomePage() {
       )
 
       /* Featured Sports Categories */
-      , React.createElement('section', { id: "sports", className: "py-16 px-4" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 64}}
-        , React.createElement('div', { className: "container mx-auto" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 65}}
-          , React.createElement('div', { className: "text-center mb-12" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 66}}
-            , React.createElement('h2', { className: "text-3xl md:text-4xl font-bold text-black mb-4"    , __self: this, __source: {fileName: _jsxFileName, lineNumber: 67}}, "Available Sports" )
-            , React.createElement('p', { className: "text-gray-600 text-lg max-w-2xl mx-auto"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 68}}, "Book venues for your favorite sports. Quality facilities and easy online booking."
+      // , React.createElement('section', { id: "sports", className: "py-16 px-4" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 64}}
+      //   , React.createElement('div', { className: "container mx-auto" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 65}}
+      //     , React.createElement('div', { className: "text-center mb-12" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 66}}
+      //       , React.createElement('h2', { className: "text-3xl md:text-4xl font-bold text-black mb-4"    , __self: this, __source: {fileName: _jsxFileName, lineNumber: 67}}, "Available Sports" )
+      //       , React.createElement('p', { className: "text-gray-600 text-lg max-w-2xl mx-auto"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 68}}, "Book venues for your favorite sports. Quality facilities and easy online booking."
 
-            )
-          )
+      //       )
+      //     )
 
-          , React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto"     , __self: this, __source: {fileName: _jsxFileName, lineNumber: 73}}
-            , [
-              { name: "Cricket", icon: "🏏", description: "Professional cricket grounds and nets", slug: "cricket" },
-              { name: "Football", icon: "⚽", description: "Full-size and 5-a-side football turfs", slug: "football" },
-              {
-                name: "Pickleball",
-                icon: "🏓",
-                description: "Modern pickleball courts with quality equipment",
-                slug: "pickleball",
-              },
-            ].map((sport, index) => (
-              React.createElement(Card, {
-                key: index,
-                className: "group hover:shadow-lg transition-all duration-300 cursor-pointer border-gray-200 hover:border-green-300"      , __self: this, __source: {fileName: _jsxFileName, lineNumber: 84}}
+      //     , React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto"     , __self: this, __source: {fileName: _jsxFileName, lineNumber: 73}}
+      //       , [
+      //         { name: "Cricket", icon: "🏏", description: "Professional cricket grounds and nets", slug: "cricket" },
+      //         { name: "Football", icon: "⚽", description: "Full-size and 5-a-side football turfs", slug: "football" },
+      //         {
+      //           name: "Pickleball",
+      //           icon: "🏓",
+      //           description: "Modern pickleball courts with quality equipment",
+      //           slug: "pickleball",
+      //         },
+      //       ].map((sport, index) => (
+      //         React.createElement(Card, {
+      //           key: index,
+      //           className: "group hover:shadow-lg transition-all duration-300 cursor-pointer border-gray-200 hover:border-green-300"      , __self: this, __source: {fileName: _jsxFileName, lineNumber: 84}}
 
-                , React.createElement(CardHeader, { className: "text-center pb-2" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 88}}
-                  , React.createElement('div', { className: "text-5xl mb-4" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 89}}, sport.icon)
-                  , React.createElement(CardTitle, { className: "text-xl text-black" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 90}}, sport.name)
-                )
-                , React.createElement(CardContent, { className: "text-center", __self: this, __source: {fileName: _jsxFileName, lineNumber: 92}}
-                  , React.createElement('p', { className: "text-gray-600 mb-4" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 93}}, sport.description)
-                  , React.createElement(Button, {
-                    variant: "outline",
-                    size: "sm",
-                    className: "w-full group-hover:bg-green-600 group-hover:text-white transition-colors border-gray-200 bg-transparent"     ,
-                    asChild: true, __self: this, __source: {fileName: _jsxFileName, lineNumber: 94}}
+      //           , React.createElement(CardHeader, { className: "text-center pb-2" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 88}}
+      //             , React.createElement('div', { className: "text-5xl mb-4" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 89}}, sport.icon)
+      //             , React.createElement(CardTitle, { className: "text-xl text-black" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 90}}, sport.name)
+      //           )
+      //           , React.createElement(CardContent, { className: "text-center", __self: this, __source: {fileName: _jsxFileName, lineNumber: 92}}
+      //             , React.createElement('p', { className: "text-gray-600 mb-4" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 93}}, sport.description)
+      //             , React.createElement(Button, {
+      //               variant: "outline",
+      //               size: "sm",
+      //               className: "w-full group-hover:bg-green-600 group-hover:text-white transition-colors border-gray-200 bg-transparent"     ,
+      //               asChild: true, __self: this, __source: {fileName: _jsxFileName, lineNumber: 94}}
 
-                    , React.createElement(Link, { href: `/locations?sport=${sport.slug}`, __self: this, __source: {fileName: _jsxFileName, lineNumber: 100}}, "Book Now" )
-                  )
-                )
-              )
-            ))
-          )
-        )
-      )
+      //               , React.createElement(Link, { href: `/locations?sport=${sport.slug}`, __self: this, __source: {fileName: _jsxFileName, lineNumber: 100}}, "Book Now" )
+      //             )
+      //           )
+      //         )
+      //       ))
+      //     )
+      //   )
+      // )
 
       /* Community Section */
-      , React.createElement('section', { id: "community", className: "py-16 px-4 bg-green-50"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 110}}
+      , React.createElement('section', { id: "community", className: "py-16 px-4"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 110}}
         , React.createElement('div', { className: "container mx-auto text-center"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 111}}
           , React.createElement('h2', { className: "text-3xl md:text-4xl font-bold text-black mb-4"    , __self: this, __source: {fileName: _jsxFileName, lineNumber: 112}}, "Why Choose SportItUp"  )
           , React.createElement('p', { className: "text-gray-600 text-lg max-w-2xl mx-auto mb-8"    , __self: this, __source: {fileName: _jsxFileName, lineNumber: 113}}, "Experience hassle-free sports venue booking with quality facilities and competitive pricing."
@@ -143,7 +143,7 @@ export default function HomePage() {
       )
 
       /* About Section */
-      , React.createElement('section', { id: "about", className: "py-16 px-4" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 152}}
+      , React.createElement('section', { id: "about", className: "py-16 px-4  bg-green-50" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 152}}
         , React.createElement('div', { className: "container mx-auto max-w-3xl"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 153}}
           , React.createElement('h2', { className: "text-3xl md:text-4xl font-bold text-black mb-4 text-balance"     , __self: this, __source: {fileName: _jsxFileName, lineNumber: 154}}, "About Sportitup" )
           , React.createElement('div', { className: "space-y-4 text-gray-700 leading-7"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 155}}
