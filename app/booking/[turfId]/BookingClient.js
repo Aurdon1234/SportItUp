@@ -217,21 +217,55 @@ export default function BookingClient({ turfId, initialDate, initialBlockedHours
     console.log("[BookingClient] timeSlots computed:", timeSlots.map((s) => s.time));
   }, [turf]);
 
+  // const toggleTimeSlot = (time) => {
+  //   if (!time) return;
+  //   if (blockedHoursSet.has(time)) return; // blocked => no action
+  //   setSelectedTimeSlots((prev) => {
+  //     const next = new Set(prev);
+  //     if (next.has(time)) next.delete(time);
+  //     else next.add(time);
+  //     return next;
+  //   });
+  // };
+
   const toggleTimeSlot = (time) => {
-    if (!time) return;
-    if (blockedHoursSet.has(time)) return; // blocked => no action
-    setSelectedTimeSlots((prev) => {
-      const next = new Set(prev);
-      if (next.has(time)) next.delete(time);
-      else next.add(time);
-      return next;
-    });
-  };
+  if (!time) return;
+  // if blocked by sheet -> no action
+  if (blockedHoursSet.has(time)) return;
+
+  // if slot is within 30 min or passed -> no action
+  if (isSlotTooCloseOrPast(selectedDate, time)) return;
+
+  setSelectedTimeSlots((prev) => {
+    const next = new Set(prev);
+    if (next.has(time)) next.delete(time);
+    else next.add(time);
+    return next;
+  });
+};
+
 
   const slotsCount = selectedTimeSlots.size;
   const totalAmount = slotsCount * (turf.pricePerHour || 0);
   const advanceAmount = Math.round(totalAmount * 0.1);
   const remainingAmount = totalAmount - advanceAmount;
+  // 30 minutes before slot start -> disable
+const DISABLE_BEFORE_MS = 30 * 60 * 1000;
+
+function slotDateTimeFor(selectedDate, timeHHMM) {
+  // selectedDate is a Date object
+  const d = new Date(selectedDate);
+  const [hh, mm] = timeHHMM.split(":").map(Number);
+  d.setHours(hh, mm, 0, 0);
+  return d;
+}
+
+function isSlotTooCloseOrPast(selectedDate, timeHHMM) {
+  const slotDt = slotDateTimeFor(selectedDate, timeHHMM);
+  const now = new Date();
+  return slotDt.getTime() - now.getTime() <= DISABLE_BEFORE_MS;
+}
+
 
   // final check before payment — re-check availability via API
   const handleProceedToPayment = async () => {
@@ -262,6 +296,14 @@ export default function BookingClient({ turfId, initialDate, initialBlockedHours
 
     const chosenSlots = Array.from(selectedTimeSlots);
 
+    const conflictsByTime = chosenSlots.filter((s) => isSlotTooCloseOrPast(selectedDate, s));
+if (conflictsByTime.length > 0) {
+  alert(`These slots are too close to start or already started: ${conflictsByTime.join(", ")}. Please reselect.`);
+  // revalidate availability UI
+  if (availabilityUrl) mutate(availabilityUrl);
+  return;
+}
+
     const bookingData = {
       turfId: safeTurfId,
       turfName: turf.name,
@@ -273,6 +315,7 @@ export default function BookingClient({ turfId, initialDate, initialBlockedHours
       advanceAmount,
       remainingAmount,
       courts: turf.courts || 1,
+      tzOffsetMinutes: new Date().getTimezoneOffset(),
     };
 
     const queryParams = new URLSearchParams({
@@ -408,7 +451,7 @@ export default function BookingClient({ turfId, initialDate, initialBlockedHours
 
                 <CardContent>
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    {timeSlots.map((slot) => {
+                    {/* {timeSlots.map((slot) => {
                       // safe property access
                       const time = slot && slot.time ? String(slot.time) : null;
                       const label = slot && slot.label ? slot.label : time || "—";
@@ -435,7 +478,44 @@ export default function BookingClient({ turfId, initialDate, initialBlockedHours
                           {disabled && <span className="absolute bottom-1 text-[10px] text-gray-600"></span>}
                         </Button>
                       );
-                    })}
+                    })} */}
+                    {timeSlots.map((slot) => {
+  const time = slot && slot.time ? String(slot.time) : null;
+  const label = slot && slot.label ? slot.label : time || "—";
+
+  const disabledBySheet = time ? blockedHoursSet.has(time) : true;
+  const disabledByTime = time ? isSlotTooCloseOrPast(selectedDate, time) : false;
+  const disabled = disabledBySheet || disabledByTime;
+
+  const isSelected = time ? selectedTimeSlots.has(time) : false;
+
+  return (
+    <Button
+      key={time || Math.random()}
+      variant={isSelected ? "default" : "outline"}
+      className={`relative h-16 flex flex-col items-center justify-center ${
+        isSelected
+          ? "bg-green-600 hover:bg-green-700 text-white"
+          : "border-gray-200 hover:border-green-300 hover:bg-green-50"
+      } ${slot.peak ? "border-orange-200 hover:border-orange-300" : ""} ${
+        disabled ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-500" : ""
+      }`}
+      onClick={() => time && toggleTimeSlot(time)}
+      disabled={disabled}
+    >
+      <span className="font-medium">{label}</span>
+      <span className="text-xs text-gray-600">₹{turf.pricePerHour}</span>
+      {slot.peak && <Badge className="absolute -top-1 -right-1 text-xs px-1 py-0 bg-orange-500">Peak</Badge>}
+
+      {/* Badge/label showing reason */}
+      {disabledBySheet && <span className="absolute bottom-1 text-[10px] text-gray-600">Booked</span>}
+      {!disabledBySheet && disabledByTime && (
+        <span className="absolute bottom-1 text-[10px] text-gray-600">Unavailable</span>
+      )}
+    </Button>
+  );
+})}
+
                   </div>
 
                   <div className="mt-4 flex items-center gap-4 text-sm text-gray-600">

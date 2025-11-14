@@ -96,6 +96,40 @@ export async function POST(req) {
     if (!turfId || !date || !Array.isArray(timeSlots) || timeSlots.length === 0) {
       return NextResponse.json({ ok: false, error: "Missing turfId, date or timeSlots" }, { status: 400 });
     }
+    // --- Server-side: reject booking if any slot is within 30 minutes or already passed ---
+// tzOffsetMinutes should be supplied from client (minutes to add to local to get UTC).
+const tzOffsetMinutes = Number(body.tzOffsetMinutes ?? 0);
+
+function slotEpochUtc(dateYYYYMMDD, timeHHMM, clientTzOffsetMinutes) {
+  const [y, m, d] = dateYYYYMMDD.split("-").map(Number);
+  const [hh, mm] = timeHHMM.split(":").map(Number);
+  // Date.UTC generates a UTC timestamp for the numbers interpreted as local time components.
+  // To convert client-local time to UTC epoch: take Date.UTC(...) and subtract client offset (in ms).
+  // Explanation: client local time + (offset minutes) -> UTC. So we subtract offset from the constructed local moment.
+  const slotUtcMs = Date.UTC(y, m - 1, d, hh, mm) - (clientTzOffsetMinutes * 60 * 1000);
+  return slotUtcMs;
+}
+
+const nowUtc = Date.now();
+const thresholdMs = 30 * 60 * 1000;
+
+const lateSlots = (timeSlots || []).filter((t) => {
+  try {
+    const slotUtcMs = slotEpochUtc(date, t, tzOffsetMinutes);
+    return (slotUtcMs - nowUtc) <= thresholdMs;
+  } catch (e) {
+    return false; // on parse errors, don't mark late here (sheet check will still block)
+  }
+});
+
+if (lateSlots.length > 0) {
+  console.warn("Rejecting booking because slots are too close/past:", lateSlots);
+  return NextResponse.json(
+    { ok: false, error: "Some time slots are too close or already passed", conflicts: lateSlots },
+    { status: 400 }
+  );
+}
+
 
     // initialize sheets client
     // (inside your route handler)
