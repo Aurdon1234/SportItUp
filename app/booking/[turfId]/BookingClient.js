@@ -508,9 +508,9 @@ if (conflictsByTime.length > 0) {
       {slot.peak && <Badge className="absolute -top-1 -right-1 text-xs px-1 py-0 bg-orange-500">Peak</Badge>}
 
       {/* Badge/label showing reason */}
-      {disabledBySheet && <span className="absolute bottom-1 text-[10px] text-gray-600">Booked</span>}
+      {disabledBySheet && <span className="absolute bottom-1 text-[10px] text-gray-600"></span>}
       {!disabledBySheet && disabledByTime && (
-        <span className="absolute bottom-1 text-[10px] text-gray-600">Unavailable</span>
+        <span className="absolute bottom-1 text-[10px] text-gray-600"></span>
       )}
     </Button>
   );
