@@ -16,9 +16,9 @@ export default function HomePage() {
             , React.createElement(require("@/components/LogoLink.js").default, {})
           )
           , React.createElement('nav', { className: "hidden md:flex items-center space-x-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 16}}
-            , React.createElement('a', { href: "#sports", className: "text-gray-600 hover:text-black transition-colors"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 17}}, "Sports"
+            // , React.createElement('a', { href: "#sports", className: "text-gray-600 hover:text-black transition-colors"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 17}}, "Sports"
 
-            )
+            // )
             , React.createElement('a', { href: "#community", className: "text-gray-600 hover:text-black transition-colors"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 20}}, "Community"
 
             )
@@ -40,7 +40,7 @@ export default function HomePage() {
           , React.createElement('h1', { className: "text-4xl md:text-6xl font-bold text-balance mb-6 text-black"     , __self: this, __source: {fileName: _jsxFileName, lineNumber: 38}}, "Book Your "
               , React.createElement('span', { className: "text-green-600", __self: this, __source: {fileName: _jsxFileName, lineNumber: 39}}, "Sports Venue" ), " with SportItUp"
           )
-          , React.createElement('p', { className: "text-xl text-gray-600 text-pretty mb-8 max-w-2xl mx-auto"     , __self: this, __source: {fileName: _jsxFileName, lineNumber: 41}}, "Find and book the best cricket, football, and pickleball venues in Amritsar and Patiala. Easy booking, great facilities, competitive prices."
+          , React.createElement('p', { className: "text-xl text-gray-600 text-pretty mb-8 max-w-2xl mx-auto"     , __self: this, __source: {fileName: _jsxFileName, lineNumber: 41}}, "Find and book the best cricket, football and pickleball venues around you. Easy booking, great facilities, competitive prices."
 
 
           )
@@ -134,11 +134,11 @@ export default function HomePage() {
             )
           )
 
-          , React.createElement(Button, { size: "lg", className: "text-lg px-8 bg-green-600 hover:bg-green-700 text-white"    , asChild: true, __self: this, __source: {fileName: _jsxFileName, lineNumber: 143}}
-            , React.createElement(Link, { href: "/locations", __self: this, __source: {fileName: _jsxFileName, lineNumber: 144}}, "Start Booking "
-                , React.createElement(ArrowRight, { className: "ml-2 w-5 h-5"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 145}} )
-            )
-          )
+          // , React.createElement(Button, { size: "lg", className: "text-lg px-8 bg-green-600 hover:bg-green-700 text-white"    , asChild: true, __self: this, __source: {fileName: _jsxFileName, lineNumber: 143}}
+          //   , React.createElement(Link, { href: "/locations", __self: this, __source: {fileName: _jsxFileName, lineNumber: 144}}, "Start Booking "
+          //       , React.createElement(ArrowRight, { className: "ml-2 w-5 h-5"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 145}} )
+          //   )
+          // )
         )
       )
 
@@ -152,12 +152,12 @@ export default function HomePage() {
 
 
             )
-            , React.createElement('p', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 161}}, "We currently provide access to cricket, football, and pickleball venues in Punjab, starting with Amritsar and Patiala, and are rapidly expanding. Whether you’re booking a friendly match or organizing a tournament, Sportitup ensures you get premium facilities at the best prices."
+            , React.createElement('p', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 161}}, "We currently provide access to cricket, football and pickleball venues in Punjab. Whether you’re booking a friendly match or organizing a tournament, Sportitup ensures you get premium facilities at the best prices."
 
 
 
             )
-            , React.createElement('p', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 166}}, "Our mission is to make sports accessible to everyone and to encourage a healthier, more active lifestyle. With Sportitup, you don’t have to worry about endless calls or last-minute turf unavailability—everything is just a click away."
+            , React.createElement('p', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 166}}, "Our mission is to make sports accessible to everyone and to encourage a healthier, more active lifestyle. With Sportitup, you don’t have to worry about endless calls or last-minute turf unavailability, everything is just a click away."
 
 
 
@@ -175,7 +175,7 @@ export default function HomePage() {
               , React.createElement('div', { className: "flex items-center space-x-2"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 181}}
                 , React.createElement('img', { src: "/sportitupp-removebg-preview.png", alt: "SportItUp", className: "h-20", __self: this, __source: {fileName: _jsxFileName, lineNumber: 182}} )
               )
-              , React.createElement('p', { className: "text-gray-600", __self: this, __source: {fileName: _jsxFileName, lineNumber: 184}}, "Punjab's premier sports venue booking platform for cricket, football, and pickleball."
+              , React.createElement('p', { className: "text-gray-600", __self: this, __source: {fileName: _jsxFileName, lineNumber: 184}}, "Punjab's premier sports venue booking platform for cricket, football and pickleball."
 
               )
             )
