@@ -106,8 +106,8 @@ const turfData = {
     closeTime: "10:00 PM",
     city: "patiala",
   },
-  "pickeball-patiala": {
-    name: "Pickeball Patiala",
+  "pickleball-patiala": {
+    name: "Pickleball Patiala",
     location: "Leela Bhawan, Patiala",
     rating: 4.4,
     reviews: 45,
