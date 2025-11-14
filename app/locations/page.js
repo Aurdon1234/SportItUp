@@ -34,7 +34,7 @@ const locations = [
     name: "Amritsar",
     state: "Punjab",
     sports: ["Cricket", "Football", "Pickleball"],
-    image: "/amritsar-sports-complex-golden-temple-city.png",
+    image: "/city-amritsar.jpg",
     popular: true,
   },
   {
@@ -42,7 +42,7 @@ const locations = [
     name: "Patiala",
     state: "Punjab",
     sports: ["Cricket", "Football", "Pickleball"],
-    image: "/patiala-sports-facilities-punjab-heritage-city.png",
+    image: "/city-patiala.jpg",
     popular: true,
   },
 ]
@@ -82,12 +82,12 @@ export default function LocationsPage() {
           , React.createElement(Link, { href: "/", className: "flex items-center space-x-2"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 80}}
             , React.createElement('img', { src: "/sportitupp-removebg-preview.png", alt: "SportItUp", className: "h-20", __self: this, __source: {fileName: _jsxFileName, lineNumber: 81}} )
           )
-          , React.createElement('div', { className: "flex items-center space-x-3"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 83}}
-            , React.createElement('span', { className: "text-sm text-gray-600" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 84}}, "Welcome back!" )
-            , React.createElement(Button, { variant: "ghost", size: "sm", className: "text-black hover:bg-green-50" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 85}}, "Profile"
+          // , React.createElement('div', { className: "flex items-center space-x-3"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 83}}
+          //   , React.createElement('span', { className: "text-sm text-gray-600" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 84}}, "Welcome back!" )
+          //   , React.createElement(Button, { variant: "ghost", size: "sm", className: "text-black hover:bg-green-50" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 85}}, "Profile"
 
-            )
-          )
+          //   )
+          // )
         )
       )
 
