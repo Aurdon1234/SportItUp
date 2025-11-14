@@ -104,7 +104,7 @@ const turfs = [
     amenities: ["Floodlights", "Equipment", "Washrooms", "Parking"],
     openTime: "6:00 AM",
     closeTime: "10:00 PM",
-    featured: true,
+    featured: false,
     courts: 1,
   },
   // Patiala Pickleball Venues
