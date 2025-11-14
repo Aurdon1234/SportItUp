@@ -1,7 +1,7 @@
 // app/booking/[turfId]/BookingClient.jsx
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import useSWR, { mutate } from "swr";
 import Link from "next/link";
 
@@ -12,18 +12,19 @@ import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MapPin, Star, Clock, ArrowLeft, CalendarIcon, CreditCard } from "lucide-react";
 
-const fetcher = (url) => fetch(url).then((r) => r.json());
+const fetcher = (url) =>
+  fetch(url)
+    .then((r) => {
+      if (!r.ok) throw new Error(`fetch ${url} failed: ${r.status}`);
+      return r.json();
+    })
+    .catch((err) => {
+      console.error("fetcher error:", err);
+      // return a safe shape so UI won't crash
+      return { ok: false, blockedHours: [] };
+    });
 
-/**
- * Props:
- *  - turfId (string)        : slug of turf (e.g. box-cricket-patiala)
- *  - initialDate (string)   : YYYY-MM-DD string for date that was server-chosen
- *  - initialBlockedHours (array) : ["08:00","09:00"] seeded from server
- *
- * Note: turfData is local mock data; if you fetch turfs remotely replace turfData usage.
- */
-export default function BookingClient({ turfId, initialDate, initialBlockedHours = [] }) {
-  // local turf dataset (same as before)
+/** turf dataset (unchanged) */
 const turfData = {
   "super-six-turf": {
     name: "Super Six Turf",
@@ -121,81 +122,104 @@ const turfData = {
   },
 };
 
-  const turf = turfData[turfId];
+const generateTimeSlots = (openTime, closeTime) => {
+  const slots = [];
+  const parseTime = (timeStr) => {
+    const [time, period] = timeStr.split(" ");
+    let [hours] = time.split(":").map(Number);
+    if (period === "PM" && hours !== 12) hours += 12;
+    if (period === "AM" && hours === 12) hours = 0;
+    return hours;
+  };
 
-  const [selectedDate, setSelectedDate] = useState(() => (initialDate ? new Date(initialDate) : new Date()));
+  const openHour = parseTime(openTime);
+  const closeHour = parseTime(closeTime);
+
+  for (let hour = openHour; hour < closeHour; hour++) {
+    const time24 = hour.toString().padStart(2, "0") + ":00";
+    const time12 =
+      hour === 0 ? "12:00 AM" : hour < 12 ? `${hour}:00 AM` : hour === 12 ? "12:00 PM" : `${hour - 12}:00 PM`;
+
+    slots.push({
+      time: time24,
+      label: time12,
+      peak: hour >= 16 && hour < 22,
+    });
+  }
+
+  return slots;
+};
+
+export default function BookingClient({ turfId, initialDate, initialBlockedHours = [] }) {
+  // defensive parse of props:
+  const safeTurfId = typeof turfId === "string" ? turfId : String(turfId || "");
+  const initialDateSafe = typeof initialDate === "string" ? initialDate : new Date().toISOString().split("T")[0];
+  const seededBlocked = Array.isArray(initialBlockedHours) ? initialBlockedHours : [];
+
+  // debug logs — these will appear in browser console
+  useEffect(() => {
+    console.log("[BookingClient] mounted", { turfId: safeTurfId, initialDate: initialDateSafe, seededBlocked });
+  }, []);
+
+  const turf = turfData[safeTurfId];
+  const [selectedDate, setSelectedDate] = useState(() => new Date(initialDateSafe));
   const [selectedTimeSlots, setSelectedTimeSlots] = useState(() => new Set());
   const [selectedSport, setSelectedSport] = useState("");
-  // seed blocked hours from server
-  const [blockedHoursSet, setBlockedHoursSet] = useState(() => new Set(initialBlockedHours || []));
 
   useEffect(() => {
-    if (turf?.sports?.length === 1 && !selectedSport) {
-      setSelectedSport(turf.sports[0]);
-    }
+    if (turf?.sports?.length === 1 && !selectedSport) setSelectedSport(turf.sports[0]);
   }, [turf, selectedSport]);
 
   const dateKey = selectedDate ? selectedDate.toISOString().split("T")[0] : "";
 
   const availabilityUrl = dateKey
-    ? `/api/public/availability?turfId=${encodeURIComponent(turfId)}&date=${encodeURIComponent(dateKey)}`
+    ? `/api/public/availability?turfId=${encodeURIComponent(safeTurfId)}&date=${encodeURIComponent(dateKey)}`
     : null;
 
-  // SWR: seed fallbackData with initialBlockedHours so first render matches server
   const { data: avail, error: availError } = useSWR(availabilityUrl, fetcher, {
     refreshInterval: 4000,
     revalidateOnFocus: false,
-    fallbackData: availabilityUrl ? { blockedHours: initialBlockedHours } : undefined,
   });
 
-  // update blocked set on live changes (also remove any selected slots that became blocked)
+  // debug the availability payload
   useEffect(() => {
-    const latest = new Set(avail?.blockedHours || initialBlockedHours || []);
-    setBlockedHoursSet(latest);
-    setSelectedTimeSlots((prev) => {
-      const next = new Set(prev);
-      for (const t of prev) if (latest.has(t)) next.delete(t);
-      return next;
-    });
-  }, [avail, initialBlockedHours]);
+    console.log("[BookingClient] availability payload", { availabilityUrl, avail, availError });
+  }, [availabilityUrl, avail, availError]);
 
-  const generateTimeSlots = (openTime, closeTime) => {
-    const slots = [];
-    const parseTime = (timeStr) => {
-      const [time, period] = timeStr.split(" ");
-      let [hours] = time.split(":").map(Number);
-      if (period === "PM" && hours !== 12) hours += 12;
-      if (period === "AM" && hours === 12) hours = 0;
-      return hours;
-    };
-
-    const openHour = parseTime(openTime);
-    const closeHour = parseTime(closeTime);
-
-    for (let hour = openHour; hour < closeHour; hour++) {
-      const time24 = hour.toString().padStart(2, "0") + ":00";
-      const time12 =
-        hour === 0 ? "12:00 AM" : hour < 12 ? `${hour}:00 AM` : hour === 12 ? "12:00 PM" : `${hour - 12}:00 PM`;
-
-      slots.push({
-        time: time24,
-        label: time12,
-        peak: hour >= 16 && hour < 22,
-      });
-    }
-
-    return slots;
-  };
+  // normalize blockedHours into a Set for fast lookups
+  const blockedHoursSet = useMemo(() => {
+    const bh = Array.isArray(avail?.blockedHours) ? avail.blockedHours : seededBlocked;
+    // ensure elements are strings like "08:00"
+    const normalized = bh.filter(Boolean).map((b) => String(b).padStart(5, "0"));
+    return new Set(normalized);
+  }, [avail, seededBlocked]);
 
   if (!turf) {
-    return <div>Turf not found</div>;
+    // show a user-friendly message; avoid throwing
+    console.warn("[BookingClient] turf not found for id:", safeTurfId);
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-lg font-semibold">Turf not found</h2>
+          <p className="text-sm text-gray-600 mt-2">Please go back to the venues list.</p>
+          <Link href={`/turfs`}>Back to Venues</Link>
+        </div>
+      </div>
+    );
   }
 
-  const timeSlots = generateTimeSlots(turf.openTime, turf.closeTime);
+  const timeSlots = Array.isArray(generateTimeSlots(turf.openTime, turf.closeTime))
+    ? generateTimeSlots(turf.openTime, turf.closeTime)
+    : [];
+
+  // debug the computed timeslots
+  useEffect(() => {
+    console.log("[BookingClient] timeSlots computed:", timeSlots.map((s) => s.time));
+  }, [turf]);
 
   const toggleTimeSlot = (time) => {
-    // don't allow toggling blocked slots
-    if (blockedHoursSet.has(time)) return;
+    if (!time) return;
+    if (blockedHoursSet.has(time)) return; // blocked => no action
     setSelectedTimeSlots((prev) => {
       const next = new Set(prev);
       if (next.has(time)) next.delete(time);
@@ -204,12 +228,12 @@ const turfData = {
     });
   };
 
-  // totals
   const slotsCount = selectedTimeSlots.size;
-  const totalAmount = slotsCount * turf.pricePerHour;
+  const totalAmount = slotsCount * (turf.pricePerHour || 0);
   const advanceAmount = Math.round(totalAmount * 0.1);
   const remainingAmount = totalAmount - advanceAmount;
 
+  // final check before payment — re-check availability via API
   const handleProceedToPayment = async () => {
     const needsSportSelection = turf.sports.length > 1 && !selectedSport;
     if (slotsCount === 0 || !selectedDate || needsSportSelection) {
@@ -217,26 +241,29 @@ const turfData = {
       return;
     }
 
-    // re-check fresh availability from the server
-    if (availabilityUrl) {
-      try {
-        const fresh = await fetch(availabilityUrl).then((r) => r.json());
-        const freshBlocked = new Set(fresh?.blockedHours || []);
-        const conflicts = Array.from(selectedTimeSlots).filter((s) => freshBlocked.has(s));
-        if (conflicts.length > 0) {
-          alert(`Sorry — these slots were just booked: ${conflicts.join(", ")}. Please reselect.`);
-          mutate(availabilityUrl);
-          return;
-        }
-      } catch (err) {
-        console.error("Failed to refresh availability:", err);
+    if (!availabilityUrl) {
+      alert("Unable to verify availability (missing URL). Try again.");
+      return;
+    }
+
+    try {
+      const fresh = await fetch(availabilityUrl).then((r) => (r.ok ? r.json() : { blockedHours: [] }));
+      const freshBlocked = new Set(Array.isArray(fresh?.blockedHours) ? fresh.blockedHours : []);
+      const conflicts = Array.from(selectedTimeSlots).filter((s) => freshBlocked.has(s));
+      if (conflicts.length > 0) {
+        alert(`Sorry — these slots were just booked: ${conflicts.join(", ")}. Please reselect.`);
+        mutate(availabilityUrl);
+        return;
       }
+    } catch (err) {
+      console.error("Failed to refresh availability:", err);
+      // optionally block or continue. We'll continue but log.
     }
 
     const chosenSlots = Array.from(selectedTimeSlots);
 
     const bookingData = {
-      turfId,
+      turfId: safeTurfId,
       turfName: turf.name,
       location: turf.location,
       date: selectedDate.toISOString().split("T")[0],
@@ -255,9 +282,9 @@ const turfData = {
     window.location.href = `/payment?${queryParams}`;
   };
 
+  // UI render — mapping is safe because timeSlots is always an array
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
       <header className="border-b border-gray-200 bg-white sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -284,7 +311,6 @@ const turfData = {
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Venue Info + Booking Form */}
           <div className="lg:col-span-2">
             <Card className="mb-6 border-gray-200">
               <div className="flex">
@@ -308,11 +334,12 @@ const turfData = {
                   </div>
 
                   <div className="flex flex-wrap gap-1 mb-2">
-                    {turf.sports.map((sport, index) => (
-                      <Badge key={index} variant="outline" className="text-xs border-green-200 text-green-700">
-                        {sport}
-                      </Badge>
-                    ))}
+                    {Array.isArray(turf.sports) &&
+                      turf.sports.map((s, i) => (
+                        <Badge key={`${s}-${i}`} variant="outline" className="text-xs border-green-200 text-green-700">
+                          {s}
+                        </Badge>
+                      ))}
                   </div>
 
                   <div className="flex items-center gap-4 text-sm text-gray-600">
@@ -327,9 +354,7 @@ const turfData = {
               </div>
             </Card>
 
-            {/* Booking Form */}
             <div className="space-y-6">
-              {/* Sport */}
               <Card className="border-gray-200">
                 <CardHeader>
                   <CardTitle className="text-lg text-black">Select Sport</CardTitle>
@@ -340,11 +365,12 @@ const turfData = {
                       <SelectValue placeholder={turf.sports.length === 1 ? turf.sports[0] : "Choose your sport"} />
                     </SelectTrigger>
                     <SelectContent>
-                      {turf.sports.map((sport) => (
-                        <SelectItem key={sport} value={sport}>
-                          {sport} - ₹{turf.pricePerHour}/hr
-                        </SelectItem>
-                      ))}
+                      {Array.isArray(turf.sports) &&
+                        turf.sports.map((sport) => (
+                          <SelectItem key={sport} value={sport}>
+                            {sport} - ₹{turf.pricePerHour}/hr
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                   {turf.sports.length > 1 && !selectedSport && (
@@ -353,7 +379,6 @@ const turfData = {
                 </CardContent>
               </Card>
 
-              {/* Date */}
               <Card className="border-gray-200">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2 text-black">
@@ -364,14 +389,13 @@ const turfData = {
                   <Calendar
                     mode="single"
                     selected={selectedDate}
-                    onSelect={setSelectedDate}
+                    onSelect={(d) => d && setSelectedDate(d)}
                     disabled={(d) => d < new Date() || d < new Date("1900-01-01")}
                     className="rounded-md border border-gray-200"
                   />
                 </CardContent>
               </Card>
 
-              {/* Time Slots */}
               <Card className="border-gray-200">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2 text-black">
@@ -385,11 +409,15 @@ const turfData = {
                 <CardContent>
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                     {timeSlots.map((slot) => {
-                      const disabled = blockedHoursSet.has(slot.time);
-                      const isSelected = selectedTimeSlots.has(slot.time);
+                      // safe property access
+                      const time = slot && slot.time ? String(slot.time) : null;
+                      const label = slot && slot.label ? slot.label : time || "—";
+                      const disabled = time ? blockedHoursSet.has(time) : true;
+                      const isSelected = time ? selectedTimeSlots.has(time) : false;
+
                       return (
                         <Button
-                          key={slot.time}
+                          key={time || Math.random()}
                           variant={isSelected ? "default" : "outline"}
                           className={`relative h-16 flex flex-col items-center justify-center ${
                             isSelected
@@ -398,10 +426,10 @@ const turfData = {
                           } ${slot.peak ? "border-orange-200 hover:border-orange-300" : ""} ${
                             disabled ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-500" : ""
                           }`}
-                          onClick={() => toggleTimeSlot(slot.time)}
+                          onClick={() => time && toggleTimeSlot(time)}
                           disabled={disabled}
                         >
-                          <span className="font-medium">{slot.label}</span>
+                          <span className="font-medium">{label}</span>
                           <span className="text-xs text-gray-600">₹{turf.pricePerHour}</span>
                           {slot.peak && <Badge className="absolute -top-1 -right-1 text-xs px-1 py-0 bg-orange-500">Peak</Badge>}
                           {disabled && <span className="absolute bottom-1 text-[10px] text-gray-600">Booked</span>}
@@ -425,7 +453,6 @@ const turfData = {
             </div>
           </div>
 
-          {/* Booking Summary */}
           <div className="lg:col-span-1">
             <Card className="sticky top-24 border-gray-200">
               <CardHeader>
@@ -489,7 +516,7 @@ const turfData = {
                     onClick={handleProceedToPayment}
                     disabled={slotsCount === 0 || !selectedDate || (turf.sports.length > 1 && !selectedSport)}
                   >
-                    <CreditCard className="w-4 h-4 mr-2 inline-block" /> Pay ₹{(selectedSport || turf.sports.length === 1) ? advanceAmount : 0} Advance
+                    <CreditCard className="w-4 h-4 mr-2 inline-block" /> Pay ₹{selectedSport || turf.sports.length === 1 ? advanceAmount : 0} Advance
                   </Button>
                 </div>
 
