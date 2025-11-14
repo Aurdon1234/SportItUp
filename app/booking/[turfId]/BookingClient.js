@@ -170,11 +170,9 @@ export default function BookingClient({ turfId, initialDate, initialBlockedHours
     if (turf?.sports?.length === 1 && !selectedSport) setSelectedSport(turf.sports[0]);
   }, [turf, selectedSport]);
 
-  const dateKey = selectedDate ? selectedDate.toISOString().split("T")[0] : "";
+  const dateKey = selectedDate ? formatDateLocal(selectedDate) : "";
+const availabilityUrl = dateKey ? `/api/public/availability?turfId=${encodeURIComponent(turfId)}&date=${encodeURIComponent(dateKey)}` : null;
 
-  const availabilityUrl = dateKey
-    ? `/api/public/availability?turfId=${encodeURIComponent(safeTurfId)}&date=${encodeURIComponent(dateKey)}`
-    : null;
 
   const { data: avail, error: availError } = useSWR(availabilityUrl, fetcher, {
     refreshInterval: 4000,
@@ -260,6 +258,15 @@ function slotDateTimeFor(selectedDate, timeHHMM) {
   return d;
 }
 
+function formatDateLocal(date) {
+  if (!date) return "";
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`; // YYYY-MM-DD in local timezone
+}
+
+
 function isSlotTooCloseOrPast(selectedDate, timeHHMM) {
   const slotDt = slotDateTimeFor(selectedDate, timeHHMM);
   const now = new Date();
@@ -308,7 +315,7 @@ if (conflictsByTime.length > 0) {
       turfId: safeTurfId,
       turfName: turf.name,
       location: turf.location,
-      date: selectedDate.toISOString().split("T")[0],
+      date: formatDateLocal(selectedDate),
       timeSlots: chosenSlots,
       sport: selectedSport || turf.sports?.[0],
       totalAmount,
