@@ -109,8 +109,8 @@ const turfs = [
   },
   // Patiala Pickleball Venues
   {
-    id: "pickeball-patiala",
-    name: "Pickeball Patiala",
+    id: "pickleball-patiala",
+    name: "Pickleball Patiala",
     location: "Leela Bhawan, Patiala",
     rating: 4.4,
     reviews: 45,
