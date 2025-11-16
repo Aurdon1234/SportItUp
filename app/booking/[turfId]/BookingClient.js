@@ -350,12 +350,6 @@ if (conflictsByTime.length > 0) {
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
-            <span className="text-sm text-gray-600">Welcome back!</span>
-            <Button variant="ghost" size="sm" className="text-black hover:bg-green-50">
-              Profile
-            </Button>
-          </div>
         </div>
       </header>
 
