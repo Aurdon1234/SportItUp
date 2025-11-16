@@ -250,13 +250,24 @@ const availabilityUrl = dateKey ? `/api/public/availability?turfId=${encodeURICo
   // 30 minutes before slot start -> disable
 const DISABLE_BEFORE_MS = 30 * 60 * 1000;
 
+// function slotDateTimeFor(selectedDate, timeHHMM) {
+//   // selectedDate is a Date object
+//   const d = new Date(selectedDate);
+//   const [hh, mm] = timeHHMM.split(":").map(Number);
+//   d.setHours(hh, mm, 0, 0);
+//   return d;
+// }
+
 function slotDateTimeFor(selectedDate, timeHHMM) {
-  // selectedDate is a Date object
-  const d = new Date(selectedDate);
+  // Build a local-time Date for the slot using the selected date's local Y/M/D.
+  // This avoids UTC-midnight issues from parsing "YYYY-MM-DD" strings.
+  const y = selectedDate.getFullYear();
+  const m = selectedDate.getMonth(); // zero-based month
+  const d = selectedDate.getDate();
   const [hh, mm] = timeHHMM.split(":").map(Number);
-  d.setHours(hh, mm, 0, 0);
-  return d;
+  return new Date(y, m, d, hh, mm, 0, 0); // local-time constructor
 }
+
 
 function formatDateLocal(date) {
   if (!date) return "";
@@ -434,7 +445,15 @@ if (conflictsByTime.length > 0) {
                     mode="single"
                     selected={selectedDate}
                     onSelect={(d) => d && setSelectedDate(d)}
-                    disabled={(d) => d < new Date() || d < new Date("1900-01-01")}
+                    // disabled={(d) => d < new Date() || d < new Date("1900-01-01")}
+                    disabled={(d) => {
+  // disable any day strictly before local today (compare date-only)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const check = new Date(d);
+  check.setHours(0, 0, 0, 0);
+  return check < today;
+}}
                     className="rounded-md border border-gray-200"
                   />
                 </CardContent>
