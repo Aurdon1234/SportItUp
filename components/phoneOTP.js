@@ -88,7 +88,7 @@ export default function PhoneOTP({ initialPhone = "", onVerified }) {
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-gray-700">Phone</label>
+      <label className="block text-sm font-medium text-gray-700"></label>
       <div className="flex gap-2">
         <input
           value={phone}
