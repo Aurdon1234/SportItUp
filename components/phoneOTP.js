@@ -94,7 +94,7 @@ export default function PhoneOTP({ initialPhone = "", onVerified }) {
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder="+91 99999 99999"
-          className="border rounded px-3 py-2 flex-1"
+          className="w-full px-3 py-2 border border-gray-200 rounded-md"
         />
         {!otpSent ? (
           <button onClick={sendOtp} disabled={loading} className="bg-green-600 text-white px-3 py-2 rounded">
@@ -106,7 +106,7 @@ export default function PhoneOTP({ initialPhone = "", onVerified }) {
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
               placeholder="OTP"
-              className="border rounded px-3 py-2 w-28"
+              className="w-full px-3 py-2 border border-gray-200 rounded-md"
             />
             <button onClick={verifyOtp} disabled={loading} className="bg-blue-600 text-white px-3 py-2 rounded">
               {loading ? "Verifying..." : "Verify"}
