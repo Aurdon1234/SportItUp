@@ -2846,7 +2846,7 @@ export default function PaymentPage() {
                       onChange={(e) => setCustomer((s) => ({ ...s, email: e.target.value }))}
                     />
                   </div>
-                  <div className="flex flex-col gap-2 mt-3">
+                  {/* <div className="flex flex-col gap-2 mt-3">
   <label className="text-sm text-gray-600">Phone Number</label>
   <input
     type="tel"
@@ -2909,7 +2909,7 @@ export default function PaymentPage() {
       </button>
     </>
   )}
-</div>
+</div> */}
 
                 </div>
 
