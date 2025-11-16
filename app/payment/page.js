@@ -2824,7 +2824,7 @@ export default function PaymentPage() {
   <Label htmlFor="custPhone">Phone Number (OTP)</Label>
    <div className="border border-gray-200 rounded-md px-3 py-2">
     {/* PhoneOTP component inside a flex container so internal inputs line up */}
-    <div className="flex items-center gap-3"></div>
+    <div className="flex items-center gap-3">
   <PhoneOTP
     initialPhone={customer.phone}
     onVerified={(phone) => {
@@ -2833,6 +2833,7 @@ export default function PaymentPage() {
       setVerifiedPhone(phone);
     }}
   />
+</div>
 </div>
   {!phoneVerified ? (
     <p className="text-sm text-yellow-600">Please verify your phone number to continue.</p>
