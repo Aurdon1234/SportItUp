@@ -212,12 +212,6 @@ export default function TurfsPage() {
 )
             )
           )
-          , React.createElement('div', { className: "flex items-center space-x-3"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 206}}
-            , React.createElement('span', { className: "text-sm text-gray-600" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 207}}, "Welcome back!" )
-            , React.createElement(Button, { variant: "ghost", size: "sm", className: "text-black hover:bg-green-50" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 208}}, "Profile"
-
-            )
-          )
         )
       )
 
