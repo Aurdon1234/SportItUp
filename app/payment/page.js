@@ -2811,20 +2811,16 @@ export default function PaymentPage() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="custName">Full Name</Label>
-                    <div className="border border-gray-200 rounded-md px-3 py-2 
-                  focus-within:ring-2 focus-within:ring-green-300 
-                  focus-within:border-green-400 transition">
+                    <Label htmlFor="custName" className="block text-sm font-medium text-gray-700">Full Name</Label>
                     <Input
                       id="custName"
                       type="text"
                       placeholder="Your full name"
                       value={customer.name}
                       onChange={(e) => setCustomer((s) => ({ ...s, name: e.target.value }))}
-                      className="w-full outline-none border-none p-0 shadow-none focus:outline-none focus:border-none"
+                      className="border rounded px-3 py-2 flex-1"
                     />
                     </div>
-                  </div>
                   <div className="space-y-2">
   <Label htmlFor="custPhone">Phone Number (OTP)</Label>
   <PhoneOTP
