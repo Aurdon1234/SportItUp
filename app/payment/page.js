@@ -2811,14 +2811,13 @@ export default function PaymentPage() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="custName" className="block text-sm font-medium text-gray-700">Full Name</Label>
+                    <Label htmlFor="custName">Full Name</Label>
                     <Input
                       id="custName"
                       type="text"
                       placeholder="Your full name"
                       value={customer.name}
                       onChange={(e) => setCustomer((s) => ({ ...s, name: e.target.value }))}
-                      className="border rounded px-3 py-2 flex-1"
                     />
                     </div>
                   <div className="space-y-2">
@@ -2944,7 +2943,7 @@ export default function PaymentPage() {
                       onValueChange={setPaymentMethod}
                       className="space-y-4"
                     >
-                      <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-card/50">
+                      {/* <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-card/50">
                         <RadioGroupItem value="upi" id="upi" />
                         <div className="flex items-center space-x-3 flex-1">
                           <Smartphone className="w-5 h-5 text-primary" />
@@ -2960,9 +2959,9 @@ export default function PaymentPage() {
                         <Badge variant="secondary" className="bg-green-100 text-green-700">
                           Instant
                         </Badge>
-                      </div>
+                      </div> */}
 
-                      <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-card/50">
+                      {/* <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-card/50">
                         <RadioGroupItem value="card" id="card" />
                         <div className="flex items-center space-x-3 flex-1">
                           <CreditCard className="w-5 h-5 text-primary" />
@@ -2973,9 +2972,9 @@ export default function PaymentPage() {
                             <p className="text-sm text-muted-foreground">Visa, Mastercard, RuPay</p>
                           </div>
                         </div>
-                      </div>
+                      </div> */}
 
-                      <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-card/50">
+                      {/* <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-card/50">
                         <RadioGroupItem value="wallet" id="wallet" />
                         <div className="flex items-center space-x-3 flex-1">
                           <Wallet className="w-5 h-5 text-primary" />
@@ -2988,7 +2987,7 @@ export default function PaymentPage() {
                             </p>
                           </div>
                         </div>
-                      </div>
+                      </div> */}
 
                       <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-card/50">
                         <RadioGroupItem value="razorpay" id="razorpay" />
