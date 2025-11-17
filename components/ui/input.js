@@ -35,7 +35,7 @@ function Input({ className, type = "text", ...props }) {
       // consistent text size, and a soft green focus ring.
       "w-full min-w-0 rounded-md border border-gray-200 bg-white px-3 py-2 text-base transition focus:outline-none",
       // focus ring / border color
-      "focus-visible:ring-2 focus-visible:ring-green-300 focus-visible:border-green-400",
+      "focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:border-gray-300",
       // disabled / aria-invalid handling (keep these)
       "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:ring-destructive/20 aria-invalid:border-destructive",
       // preserve any additional classes passed in
