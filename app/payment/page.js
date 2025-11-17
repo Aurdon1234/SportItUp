@@ -3012,7 +3012,7 @@ export default function PaymentPage() {
                     <CardTitle className="text-lg">Payment Details</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {paymentMethod === "upi" && (
+                    {/* {paymentMethod === "upi" && (
                       <>
                         <div className="space-y-2">
                           <Label htmlFor="upiId">Your UPI ID</Label>
@@ -3092,7 +3092,7 @@ export default function PaymentPage() {
                           onChange={(e) => handleInputChange("walletProvider", e.target.value)}
                         />
                       </div>
-                    )}
+                    )} */}
 
                     <Button
                       className="w-full bg-green-600 hover:bg-green-700 text-white"
