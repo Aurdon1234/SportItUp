@@ -191,7 +191,6 @@ export default function LocationsPage() {
             })
           )
         )
-
         /* No Results */
         , filteredLocations.length === 0 && (
           React.createElement('div', { className: "text-center py-12" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 195}}
