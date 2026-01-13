@@ -139,9 +139,9 @@ export default function LocationsPage() {
                       alt: `${location.name} sports venues`,
                       className: "w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"     , __self: this, __source: {fileName: _jsxFileName, lineNumber: 141}}
                     )
-                    , React.createElement('div', { className: "absolute top-3 right-3"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 146}}
-                      , React.createElement(Badge, { className: "bg-green-600 text-white" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 147}}, "Available")
-                    )
+                    , React.createElement('div', { className: "absolute top-3 right-3" }, location.id === "amritsar" ? 
+                        React.createElement(Badge, { className: "bg-yellow-500 text-white" }, "Coming Soon") : 
+                        React.createElement(Badge, { className: "bg-green-600 text-white" }, "Available"))
                   )
                   , React.createElement(CardHeader, { className: "pb-2", __self: this, __source: {fileName: _jsxFileName, lineNumber: 150}}
                     , React.createElement('div', { className: "flex items-center justify-between"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 151}}
