@@ -14,13 +14,13 @@ import Link from "next/link"
 const getVenueCountBySport = (locationId, sport) => {
   if (!sport) {
     // Return total venues if no sport selected
-    return locationId === "amritsar" ? 5 : 2
+    return locationId === "amritsar" ? 0 : 3
   }
 
   if (sport === "cricket") {
-    return locationId === "amritsar" ? 3 : 1 // Amritsar: Super Six, theturfplay, Pavilion | Patiala: Box cricket
+    return locationId === "amritsar" ? 0 : 1 // Amritsar: Super Six, theturfplay, Pavilion | Patiala: Box cricket
   } else if (sport === "pickleball") {
-    return locationId === "amritsar" ? 2 : 1 // Amritsar: Pickleup, Pavilion | Patiala: Pickeball Patiala
+    return locationId === "amritsar" ? 0 : 2 // Amritsar: Pickleup, Pavilion | Patiala: Pickeball Patiala
   } else if (sport === "football") {
     return 0 // No football venues currently available
   }
@@ -82,12 +82,6 @@ export default function LocationsPage() {
           , React.createElement(Link, { href: "/", className: "flex items-center space-x-2"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 80}}
             , React.createElement('img', { src: "/sportitupp-removebg-preview.png", alt: "SportItUp", className: "h-20", __self: this, __source: {fileName: _jsxFileName, lineNumber: 81}} )
           )
-          // , React.createElement('div', { className: "flex items-center space-x-3"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 83}}
-          //   , React.createElement('span', { className: "text-sm text-gray-600" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 84}}, "Welcome back!" )
-          //   , React.createElement(Button, { variant: "ghost", size: "sm", className: "text-black hover:bg-green-50" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 85}}, "Profile"
-
-          //   )
-          // )
         )
       )
 
