@@ -113,7 +113,7 @@ const turfData = {
     reviews: 98,
     sports: ["Pickleball"],
     pricePerHour: 600,
-    courts: 1,
+    courts: 2,
     image: "/pickleball-patiala.webp",
     amenities: ["Floodlights", "Equipment", "Washrooms", "Parking"],
     openTime: "6:00 AM",
@@ -184,8 +184,20 @@ export default function BookingClient({ turfId, initialDate, initialBlockedHours
     if (turf?.sports?.length === 1 && !selectedSport) setSelectedSport(turf.sports[0]);
   }, [turf, selectedSport]);
 
+  //CHANGE FOR COURTS
+  const courtsCount = turf.courts || 1;
+  const [selectedCourt, setSelectedCourt] = useState("Court 1");
+
+  useEffect(() => {
+    setSelectedCourt("Court 1");
+  }, [safeTurfId]);
+
   const dateKey = selectedDate ? formatDateLocal(selectedDate) : "";
-const availabilityUrl = dateKey ? `/api/public/availability?turfId=${encodeURIComponent(turfId)}&date=${encodeURIComponent(dateKey)}` : null;
+  // const availabilityUrl = dateKey ? `/api/public/availability?turfId=${encodeURIComponent(turfId)}&date=${encodeURIComponent(dateKey)}` : null;
+  const availabilityUrl = dateKey
+  ? `/api/public/availability?turfId=${encodeURIComponent(turfId)}&date=${encodeURIComponent(dateKey)}&court=${encodeURIComponent(selectedCourt)}`
+  : null;
+
 
 
   const { data: avail, error: availError } = useSWR(availabilityUrl, fetcher, {
@@ -228,6 +240,7 @@ const availabilityUrl = dateKey ? `/api/public/availability?turfId=${encodeURICo
   useEffect(() => {
     console.log("[BookingClient] timeSlots computed:", timeSlots.map((s) => s.time));
   }, [turf]);
+
 
   // const toggleTimeSlot = (time) => {
   //   if (!time) return;
@@ -339,6 +352,8 @@ if (conflictsByTime.length > 0) {
     const bookingData = {
       turfId: safeTurfId,
       turfName: turf.name,
+      // CHANGE FOR COURTS
+      court: selectedCourt,
       location: turf.location,
       date: formatDateLocal(selectedDate),
       timeSlots: chosenSlots,
@@ -472,6 +487,39 @@ if (conflictsByTime.length > 0) {
                   />
                 </CardContent>
               </Card>
+              {/* CHANGE FOR COURTS */}
+              {courtsCount > 1 && (
+                <Card className="border-gray-200">
+                  <CardHeader>
+                    <CardTitle className="text-lg text-black">Select Court</CardTitle>
+                  </CardHeader>
+                <CardContent>
+      <div className="flex gap-3">
+        {Array.from({ length: courtsCount }).map((_, i) => {
+          const court = `Court ${i + 1}`;
+          return (
+            <Button
+              key={court}
+              variant={selectedCourt === court ? "default" : "outline"}
+              className={
+                selectedCourt === court
+                  ? "bg-green-600 text-white"
+                  : "border-gray-200"
+              }
+              onClick={() => {
+                setSelectedTimeSlots(new Set()); // clear slots when court changes
+                setSelectedCourt(court);
+              }}
+            >
+              {court}
+            </Button>
+          );
+        })}
+      </div>
+    </CardContent>
+  </Card>
+)}
+
 
               <Card className="border-gray-200">
                 <CardHeader>

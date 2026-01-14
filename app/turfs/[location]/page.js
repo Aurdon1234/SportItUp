@@ -167,7 +167,7 @@ const turfs = [
     openTime: "6:00 AM",
     closeTime: "10:00 PM",
     featured: false,
-    courts: 1,
+    courts: 2,
   },
   {
     id: "pinnacle-patiala",
