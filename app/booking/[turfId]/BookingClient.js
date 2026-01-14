@@ -185,11 +185,12 @@ export default function BookingClient({ turfId, initialDate, initialBlockedHours
   }, [turf, selectedSport]);
 
   //CHANGE FOR COURTS
-  const courtsCount = turf.courts || 1;
-  const [selectedCourt, setSelectedCourt] = useState("Court 1");
+  const courtsCount = turf?.courts || 1;
+  const [selectedCourt, setSelectedCourt] = useState("1");
 
   useEffect(() => {
-    setSelectedCourt("Court 1");
+    setSelectedCourt("1");
+    setSelectedTimeSlots(new Set());
   }, [safeTurfId]);
 
   const dateKey = selectedDate ? formatDateLocal(selectedDate) : "";
@@ -497,22 +498,24 @@ if (conflictsByTime.length > 0) {
       <div className="flex gap-3">
         {Array.from({ length: courtsCount }).map((_, i) => {
           const court = `Court ${i + 1}`;
+          const courtNumber = String(i + 1);
           return (
             <Button
-              key={court}
-              variant={selectedCourt === court ? "default" : "outline"}
-              className={
-                selectedCourt === court
-                  ? "bg-green-600 text-white"
-                  : "border-gray-200"
-              }
-              onClick={() => {
-                setSelectedTimeSlots(new Set()); // clear slots when court changes
-                setSelectedCourt(court);
-              }}
-            >
-              {court}
-            </Button>
+  key={courtNumber}
+  variant={selectedCourt === courtNumber ? "default" : "outline"}
+  className={
+    selectedCourt === courtNumber
+      ? "bg-green-600 text-white"
+      : "border-gray-200"
+  }
+  onClick={() => {
+    setSelectedTimeSlots(new Set()); // reset slots
+    setSelectedCourt(courtNumber);   // ✅ store ONLY number
+  }}
+>
+  Court {courtNumber} {/* UI label only */}
+</Button>
+
           );
         })}
       </div>
