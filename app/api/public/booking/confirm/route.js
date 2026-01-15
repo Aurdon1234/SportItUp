@@ -90,6 +90,7 @@ export async function POST(req) {
       totalAmount, advanceAmount, remainingAmount,
       turfId, turfName, location, city, sport,
       date, timeSlots = [],
+      court,
       paymentMethod, paymentMeta = {},
     } = body || {};
 
@@ -99,6 +100,11 @@ export async function POST(req) {
     // --- Server-side: reject booking if any slot is within 30 minutes or already passed ---
 // tzOffsetMinutes should be supplied from client (minutes to add to local to get UTC).
 const tzOffsetMinutes = Number(body.tzOffsetMinutes ?? 0);
+
+const normCourt =
+  court !== undefined && court !== null
+    ? String(court).replace(/court\s*/i, "").trim()
+    : "1";
 
 function slotEpochUtc(dateYYYYMMDD, timeHHMM, clientTzOffsetMinutes) {
   const [y, m, d] = dateYYYYMMDD.split("-").map(Number);
@@ -174,11 +180,15 @@ try {
     const venueIdx = header.findIndex((h) => ["turf", "turfid", "turf_id", "venue", "venue_name", "venue name", "slug"].includes(h));
     const dateIdx = header.findIndex((h) => ["date", "bookingdate", "booking date"].includes(h));
     const timeIdx = header.findIndex((h) => ["time", "timeslot", "time slot", "slot", "slots"].includes(h));
+    const courtIdx = header.findIndex((h) => ["court", "court number", "court_no", "court no"].includes(h)
+);
+
 
     // sensible fallbacks (0-based indices)
     const VENUE_COL = venueIdx >= 0 ? venueIdx : 4; // fallback to column E (index 4)
-    const DATE_COL = dateIdx >= 0 ? dateIdx : 5; // fallback to column F (index 5)
-    const TIMESLOT_COL = timeIdx >= 0 ? timeIdx : 6; // fallback to column G (index 6)
+    const COURT_COL = courtIdx >= 0 ? courtIdx : 5; // fallback to column F
+    const DATE_COL = dateIdx >= 0 ? dateIdx : 6; // fallback to column F (index 5)
+    const TIMESLOT_COL = timeIdx >= 0 ? timeIdx : 7; // fallback to column G (index 6)
 
     // build list of existing booked times for this turf + date
     // iterate rows starting after header (if header exists)
@@ -186,24 +196,24 @@ try {
     const existingSlots = [];
 
     for (let i = startRow; i < rows.length; i++) {
-      const r = rows[i] || [];
       const venueCell = (r[VENUE_COL] || "").toString().trim().toLowerCase();
-      const dateCell = (r[DATE_COL] || "").toString().trim();
-      const timesCell = r[TIMESLOT_COL] || "";
+const courtCell = (r[COURT_COL] || "").toString().trim();
+const dateCell = (r[DATE_COL] || "").toString().trim();
+const timesCell = r[TIMESLOT_COL] || "";
 
-      if (!venueCell || !dateCell || !timesCell) continue;
+if (!venueCell || !dateCell || !timesCell) continue;
 
-      // match turf: allow turfId or turfName substring match (case-insensitive)
-      const turfLower = turfId.toString().toLowerCase();
-      const turfNameLower = (turfName || "").toString().toLowerCase();
+const turfLower = turfId.toString().toLowerCase();
+const turfNameLower = (turfName || "").toString().toLowerCase();
 
-      const matchVenue = venueCell.includes(turfLower) || (turfNameLower && venueCell.includes(turfNameLower));
-      if (!matchVenue) continue;
-      if (dateCell !== date) continue;
+const matchVenue =
+  venueCell.includes(turfLower) ||
+  (turfNameLower && venueCell.includes(turfNameLower));
 
-      // extract times
-      const times = extractTimesFromCell(timesCell);
-      for (const t of times) existingSlots.push(t);
+if (!matchVenue) continue;
+if (dateCell !== date) continue;
+if (String(courtCell) !== normalizedCourt) continue; // ✅ COURT FILTER
+
     }
 
     // normalize incoming timeSlots (the ones user selected) to same format
@@ -233,6 +243,7 @@ try {
         phone || "",
         email || "",
         turfId,
+        normCourt,
         date,
         normTimesForWrite,
         typeof totalAmount === "number" ? totalAmount : totalAmount || "",
