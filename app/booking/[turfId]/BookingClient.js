@@ -433,7 +433,7 @@ if (conflictsByTime.length > 0) {
                       {turf.openTime} - {turf.closeTime}
                     </div>
                     <div className="text-green-600 font-medium">₹{turf.pricePerHour}/hr</div>
-                    {turf.courts && turf.courts > 1 && <div>{turf.courts} courts available</div>}
+                    {turf.courts && turf.courts > 1 && <div>{turf.courts} Courts Available</div>}
                   </div>
                 </div>
               </div>
