@@ -479,7 +479,8 @@ export default function PaymentPage() {
   {!phoneVerified ? (
     <p className="text-sm text-yellow-600">Please verify your phone number to continue.</p>
   ) : (
-    <p className="text-sm text-green-600">✅ Phone verified</p>
+    // <p className="text-sm text-green-600">✅ Phone verified</p>
+    null
   )}
 </div>
                   <div className="space-y-2 md:col-span-2">
