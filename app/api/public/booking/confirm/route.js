@@ -299,56 +299,148 @@
 // }
 
 
+// // app/api/public/booking/confirm/route.js
+// import { NextResponse } from "next/server";
+// import { appendBookingRow } from "@/lib/google-sheets";
+
+// /**
+//  * Convert local slot time to UTC epoch (for 30-min validation)
+//  */
+// function slotEpochUtc(dateYYYYMMDD, timeHHMM, clientTzOffsetMinutes) {
+//   const [y, m, d] = dateYYYYMMDD.split("-").map(Number);
+//   const [hh, mm] = timeHHMM.split(":").map(Number);
+
+//   // Create UTC timestamp from local date/time
+//   return (
+//     Date.UTC(y, m - 1, d, hh, mm) -
+//     clientTzOffsetMinutes * 60 * 1000
+//   );
+// }
+
+// export async function POST(req) {
+//   try {
+//     console.log("🟢 Booking confirm called");
+
+//     let body;
+//     try {
+//       body = await req.json();
+//     } catch {
+//       return NextResponse.json(
+//         { ok: false, error: "Invalid JSON body" },
+//         { status: 400 }
+//       );
+//     }
+
+//     const {
+//       name,
+//       phone,
+//       email,
+//       turfId,
+//       turfName,
+//       court,              // ✅ IMPORTANT
+//       date,
+//       timeSlots = [],
+//       totalAmount,
+//       advanceAmount,
+//       remainingAmount,
+//       paymentMethod,
+//       paymentMeta = {},
+//       tzOffsetMinutes = 0,
+//     } = body;
+
+//     // ---------- BASIC VALIDATION ----------
+//     if (
+//       !name ||
+//       !phone ||
+//       !email ||
+//       !turfId ||
+//       !date ||
+//       !Array.isArray(timeSlots) ||
+//       timeSlots.length === 0
+//     ) {
+//       return NextResponse.json(
+//         { ok: false, error: "Missing required booking data" },
+//         { status: 400 }
+//       );
+//     }
+
+//     // ---------- 30 MINUTE RULE ----------
+//     const nowUtc = Date.now();
+//     const thresholdMs = 30 * 60 * 1000;
+
+//     const lateSlots = timeSlots.filter((t) => {
+//       try {
+//         const slotUtc = slotEpochUtc(date, t, tzOffsetMinutes);
+//         return slotUtc - nowUtc <= thresholdMs;
+//       } catch {
+//         return true;
+//       }
+//     });
+
+//     if (lateSlots.length > 0) {
+//       return NextResponse.json(
+//         {
+//           ok: false,
+//           error: "Some slots are too close or already started",
+//           conflicts: lateSlots,
+//         },
+//         { status: 400 }
+//       );
+//     }
+
+//     // ---------- WRITE TO GOOGLE SHEETS ----------
+//     await appendBookingRow({
+//       name,
+//       phone,
+//       email,
+//       venue: turfId,
+//       court: String(court || "1"), // ✅ STORE AS 1 / 2 / 3
+//       date,
+//       timeSlot: timeSlots.join(", "),
+//       durationHours: timeSlots.length,
+//       totalAmount,
+//       advanceAmount,
+//       remainingAmount,
+//       paymentMethod,
+//       paymentMeta,
+//     });
+
+//     console.log("✅ Booking successfully written to Google Sheet");
+
+//     return NextResponse.json({ ok: true });
+//   } catch (err) {
+//     console.error("❌ Booking confirm failed:", err);
+//     return NextResponse.json(
+//       { ok: false, error: err?.message || "Internal server error" },
+//       { status: 500 }
+//     );
+//   }
+// }
+
 // app/api/public/booking/confirm/route.js
 import { NextResponse } from "next/server";
-import { appendBookingRow } from "@/lib/google-sheets";
-
-/**
- * Convert local slot time to UTC epoch (for 30-min validation)
- */
-function slotEpochUtc(dateYYYYMMDD, timeHHMM, clientTzOffsetMinutes) {
-  const [y, m, d] = dateYYYYMMDD.split("-").map(Number);
-  const [hh, mm] = timeHHMM.split(":").map(Number);
-
-  // Create UTC timestamp from local date/time
-  return (
-    Date.UTC(y, m - 1, d, hh, mm) -
-    clientTzOffsetMinutes * 60 * 1000
-  );
-}
+import { getSheetsClient } from "@/lib/google-sheets";
 
 export async function POST(req) {
   try {
-    console.log("🟢 Booking confirm called");
-
-    let body;
-    try {
-      body = await req.json();
-    } catch {
-      return NextResponse.json(
-        { ok: false, error: "Invalid JSON body" },
-        { status: 400 }
-      );
-    }
+    const body = await req.json();
 
     const {
       name,
       phone,
       email,
       turfId,
-      turfName,
-      court,              // ✅ IMPORTANT
-      date,
-      timeSlots = [],
+      court,
+      date,              // expected: "2026-01-16"
+      timeSlots,         // expected: ["18:00"]
       totalAmount,
       advanceAmount,
       remainingAmount,
       paymentMethod,
-      paymentMeta = {},
-      tzOffsetMinutes = 0,
-    } = body;
+      paymentMeta,
+    } = body || {};
 
-    // ---------- BASIC VALIDATION ----------
+    // ---- BASIC VALIDATION ----
     if (
       !name ||
       !phone ||
@@ -359,59 +451,54 @@ export async function POST(req) {
       timeSlots.length === 0
     ) {
       return NextResponse.json(
-        { ok: false, error: "Missing required booking data" },
+        { ok: false, error: "Missing required booking fields" },
         { status: 400 }
       );
     }
 
-    // ---------- 30 MINUTE RULE ----------
-    const nowUtc = Date.now();
-    const thresholdMs = 30 * 60 * 1000;
+    // ---- NORMALIZE VALUES (CRITICAL PART) ----
+    const timestampISO = new Date().toISOString();
 
-    const lateSlots = timeSlots.filter((t) => {
-      try {
-        const slotUtc = slotEpochUtc(date, t, tzOffsetMinutes);
-        return slotUtc - nowUtc <= thresholdMs;
-      } catch {
-        return true;
-      }
+    // Force TEXT so Google Sheets never converts them
+    const safeDate = `'${date}`;                     // '2026-01-16
+    const safeTimeSlot = `'${timeSlots.join(", ")}`; // '18:00
+    const safeCourt = court ? String(court) : "1";
+
+    const values = [
+      [
+        timestampISO,                 // A Timestamp
+        name,                          // B Name
+        phone,                         // C Phone
+        email,                         // D Email
+        turfId,                        // E Venue
+        safeCourt,                     // F Court
+        safeDate,                      // G Date (TEXT)
+        safeTimeSlot,                 // H Time Slot (TEXT)
+        Number(totalAmount) || 0,      // I Total Amount
+        Number(advanceAmount) || 0,    // J Amount Paid
+        Number(remainingAmount) || 0,  // K Amount Remaining
+        paymentMethod || "",           // L Payment Mode
+        JSON.stringify(paymentMeta || {}), // M Payment Meta
+      ],
+    ];
+
+    const client = await getSheetsClient();
+    const { sheets, spreadsheetId, sheetTitle } = client;
+
+    // ---- APPEND ROW ----
+    await sheets.spreadsheets.values.append({
+      spreadsheetId,
+      range: `${sheetTitle}!A2`,
+      valueInputOption: "USER_ENTERED", // VERY IMPORTANT
+      insertDataOption: "INSERT_ROWS",
+      requestBody: { values },
     });
-
-    if (lateSlots.length > 0) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error: "Some slots are too close or already started",
-          conflicts: lateSlots,
-        },
-        { status: 400 }
-      );
-    }
-
-    // ---------- WRITE TO GOOGLE SHEETS ----------
-    await appendBookingRow({
-      name,
-      phone,
-      email,
-      venue: turfId,
-      court: String(court || "1"), // ✅ STORE AS 1 / 2 / 3
-      date,
-      timeSlot: timeSlots.join(", "),
-      durationHours: timeSlots.length,
-      totalAmount,
-      advanceAmount,
-      remainingAmount,
-      paymentMethod,
-      paymentMeta,
-    });
-
-    console.log("✅ Booking successfully written to Google Sheet");
 
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("❌ Booking confirm failed:", err);
     return NextResponse.json(
-      { ok: false, error: err?.message || "Internal server error" },
+      { ok: false, error: "Failed to record booking" },
       { status: 500 }
     );
   }
