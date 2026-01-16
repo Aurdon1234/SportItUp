@@ -113,7 +113,7 @@ const turfData = {
     reviews: 98,
     sports: ["Pickleball"],
     pricePerHour: 600,
-    courts: 2,
+    courts: 3,
     image: "/pickleball-patiala.webp",
     amenities: ["Floodlights", "Equipment", "Washrooms", "Parking"],
     openTime: "6:00 AM",
