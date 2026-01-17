@@ -63,7 +63,7 @@ export async function POST(req) {
       ],
     ];
 
-    const client = await getSheetsClient();
+    const client = await getSheetsClient(turfId);
     const { sheets, spreadsheetId, sheetTitle } = client;
 
     // ---- APPEND ROW ----

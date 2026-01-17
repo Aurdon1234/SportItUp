@@ -63,7 +63,7 @@ export async function GET(req) {
 
     let rows = [];
     try {
-      rows = await getAllBookingRows(); // expected: array of arrays (rows)
+      rows = await getAllBookingRows(turfId); // expected: array of arrays (rows)
     } catch (err) {
       console.error("[availability] getAllBookingRows error:", err);
       return NextResponse.json({ ok: false, error: "Failed to read sheet", details: String(err) }, { status: 500 });
