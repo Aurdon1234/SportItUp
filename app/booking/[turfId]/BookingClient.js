@@ -99,7 +99,9 @@ const turfData = {
     rating: 4.9,
     reviews: 213,
     sports: ["Cricket"],
-    pricePerHour: 1000,
+    // pricePerHour: 1000,
+    priceNormal: 1000,
+    pricePeak: 1000,
     image: "/box-cricket-patiala.webp",
     amenities: ["Floodlights", "Equipment", "Washrooms", "Parking"],
     openTime: "6:00 AM",
@@ -112,7 +114,9 @@ const turfData = {
     rating: 4.9,
     reviews: 98,
     sports: ["Pickleball"],
-    pricePerHour: 600,
+    // pricePerHour: 600,
+    priceNormal: 600,
+    pricePeak: 600,
     courts: 2,
     image: "/pickleball-patiala.webp",
     amenities: ["Floodlights", "Equipment", "Washrooms", "Parking"],
@@ -126,7 +130,9 @@ const turfData = {
     rating: 5.0,
     reviews: 1,
     sports: ["Pickleball"],
-    pricePerHour: 800,
+    // pricePerHour: 800,
+    priceNormal: 600,
+    pricePeak: 800,
     courts: 2,
     image: "/pinnacle-patiala.png",
     amenities: ["Floodlights", "Equipment", "Washrooms", "Parking"],
@@ -135,6 +141,15 @@ const turfData = {
     city: "patiala",
   },  
 };
+
+const PEAK_START_HOUR = 17; // 5 PM
+const PEAK_END_HOUR = 24;   // 10 PM
+
+function isPeakHour(timeHHMM) {
+  const hour = parseInt(timeHHMM.split(":")[0], 10);
+  return hour >= PEAK_START_HOUR && hour < PEAK_END_HOUR;
+}
+
 
 const generateTimeSlots = (openTime, closeTime) => {
   const slots = [];
@@ -157,7 +172,7 @@ const generateTimeSlots = (openTime, closeTime) => {
     slots.push({
       time: time24,
       label: time12,
-      peak: hour >= 17 && hour < 24,
+      peak: hour >= PEAK_START_HOUR && hour < PEAK_END_HOUR,
     });
   }
 
@@ -272,7 +287,11 @@ export default function BookingClient({ turfId, initialDate, initialBlockedHours
 
 
   const slotsCount = selectedTimeSlots.size;
-  const totalAmount = slotsCount * (turf.pricePerHour || 0);
+  // const totalAmount = slotsCount * (turf.pricePerHour || 0);
+  const totalAmount = Array.from(selectedTimeSlots).reduce((sum, t) => {
+  return sum + (isPeakHour(t) ? turf.pricePeak : turf.priceNormal);}, 0);
+
+
   const advanceAmount = Math.round(totalAmount * 0.1);
   const remainingAmount = totalAmount - advanceAmount;
   // 30 minutes before slot start -> disable
@@ -432,7 +451,14 @@ if (conflictsByTime.length > 0) {
                       <Clock className="w-4 h-4" />
                       {turf.openTime} - {turf.closeTime}
                     </div>
-                    <div className="text-green-600 font-medium">₹{turf.pricePerHour}/hr</div>
+                    <div className="text-green-600 font-medium">
+  ₹{turf.priceNormal}/hr
+  {turf.pricePeak && (
+    <span className="ml-2 text-orange-600">
+      (₹{turf.pricePeak}/hr peak)
+    </span>
+  )}
+</div>
                     {turf.courts && turf.courts > 1 && <div>{turf.courts} Courts Available</div>}
                   </div>
                 </div>
