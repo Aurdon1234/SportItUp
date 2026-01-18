@@ -615,7 +615,7 @@ if (conflictsByTime.length > 0) {
       disabled={disabled}
     >
       <span className="font-medium">{label}</span>
-      <span className="text-xs text-gray-600">₹{turf.pricePerHour}</span>
+      <span className="text-xs text-gray-600">₹{isPeakHour(time) ? turf.pricePeak : turf.priceNormal}</span>
       {slot.peak && <Badge className="absolute -top-1 -right-1 text-xs px-1 py-0 bg-orange-500">Peak</Badge>}
 
       {/* Badge/label showing reason */}
