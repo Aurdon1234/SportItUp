@@ -93,37 +93,37 @@ const turfData = {
   //   closeTime: "11:59 PM",
   //   city: "amritsar",
   // },
-  "box-cricket-patiala": {
-    name: "Box Cricket Patiala",
-    location: "Sheesh Mahal Enclave, Patiala",
-    rating: 4.9,
-    reviews: 213,
-    sports: ["Cricket"],
-    // pricePerHour: 1000,
-    priceNormal: 1000,
-    pricePeak: 1000,
-    image: "/box-cricket-patiala.webp",
-    amenities: ["Floodlights", "Equipment", "Washrooms", "Parking"],
-    openTime: "6:00 AM",
-    closeTime: "10:00 PM",
-    city: "patiala",
-  },
-  "pickleball-patiala": {
-    name: "Pickleball Patiala",
-    location: "Sheesh Mahal Enclave, Patiala",
-    rating: 4.9,
-    reviews: 98,
-    sports: ["Pickleball"],
-    // pricePerHour: 600,
-    priceNormal: 600,
-    pricePeak: 600,
-    courts: 2,
-    image: "/pickleball-patiala.webp",
-    amenities: ["Floodlights", "Equipment", "Washrooms", "Parking"],
-    openTime: "6:00 AM",
-    closeTime: "10:00 PM",
-    city: "patiala",
-  },
+  // "box-cricket-patiala": {
+  //   name: "Box Cricket Patiala",
+  //   location: "Sheesh Mahal Enclave, Patiala",
+  //   rating: 4.9,
+  //   reviews: 213,
+  //   sports: ["Cricket"],
+  //   // pricePerHour: 1000,
+  //   priceNormal: 1000,
+  //   pricePeak: 1000,
+  //   image: "/box-cricket-patiala.webp",
+  //   amenities: ["Floodlights", "Equipment", "Washrooms", "Parking"],
+  //   openTime: "6:00 AM",
+  //   closeTime: "10:00 PM",
+  //   city: "patiala",
+  // },
+  // "pickleball-patiala": {
+  //   name: "Pickleball Patiala",
+  //   location: "Sheesh Mahal Enclave, Patiala",
+  //   rating: 4.9,
+  //   reviews: 98,
+  //   sports: ["Pickleball"],
+  //   // pricePerHour: 600,
+  //   priceNormal: 600,
+  //   pricePeak: 600,
+  //   courts: 2,
+  //   image: "/pickleball-patiala.webp",
+  //   amenities: ["Floodlights", "Equipment", "Washrooms", "Parking"],
+  //   openTime: "6:00 AM",
+  //   closeTime: "10:00 PM",
+  //   city: "patiala",
+  // },
   "pinnacle-patiala": {
     name: "The Pinnacle Club",
     location: "Tiwana Chownk, Near Bhadson Rd, Patiala",
@@ -142,8 +142,8 @@ const turfData = {
   },  
 };
 
-const PEAK_START_HOUR = 17; // 5 PM
-const PEAK_END_HOUR = 24;   // 10 PM
+const PEAK_START_HOUR = 16; // 4 PM
+const PEAK_END_HOUR = 24;   // 12 AM
 
 function isPeakHour(timeHHMM) {
   const hour = parseInt(timeHHMM.split(":")[0], 10);
