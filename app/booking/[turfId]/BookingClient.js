@@ -126,7 +126,7 @@ const turfData = {
     rating: 5.0,
     reviews: 1,
     sports: ["Pickleball"],
-    pricePerHour: 600,
+    pricePerHour: 800,
     courts: 2,
     image: "/pinnacle-patiala.png",
     amenities: ["Floodlights", "Equipment", "Washrooms", "Parking"],
@@ -157,7 +157,7 @@ const generateTimeSlots = (openTime, closeTime) => {
     slots.push({
       time: time24,
       label: time12,
-      peak: hour >= 16 && hour < 22,
+      peak: hour >= 17 && hour < 22,
     });
   }
 
