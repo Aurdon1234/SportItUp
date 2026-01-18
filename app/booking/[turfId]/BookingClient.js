@@ -479,7 +479,8 @@ if (conflictsByTime.length > 0) {
                       {Array.isArray(turf.sports) &&
                         turf.sports.map((sport) => (
                           <SelectItem key={sport} value={sport}>
-                            {sport} - ₹{turf.priceNormal} {turf.pricePeak && ` - ₹${turf.pricePeak}`}/hr
+                            {sport} : ₹{turf.priceNormal} {turf.pricePeak && turf.pricePeak !== turf.priceNormal && (<> - ₹{turf.pricePeak}</>
+  )}/hr
                           </SelectItem>
                         ))}
                     </SelectContent>
