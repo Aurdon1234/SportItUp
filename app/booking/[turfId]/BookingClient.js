@@ -408,9 +408,16 @@ if (conflictsByTime.length > 0) {
       date: formatDateLocal(selectedDate),
       timeSlots: chosenSlots,
       sport: selectedSport || turf.sports?.[0],
-      totalAmount,
-      advanceAmount,
-      remainingAmount,
+      // totalAmount,
+      // advanceAmount,
+      // remainingAmount,
+  totalAmount: discountedTotal,
+  advanceAmount: finalAdvanceAmount,
+  remainingAmount: finalRemainingAmount,
+
+  couponCode: couponApplied ? "EARLYBIRD" : null,
+  discountAmount,
+  
       courts: turf.courts || 1,
       tzOffsetMinutes: new Date().getTimezoneOffset(),
     };
