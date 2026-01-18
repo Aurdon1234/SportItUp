@@ -195,6 +195,11 @@ export default function BookingClient({ turfId, initialDate, initialBlockedHours
   const [selectedTimeSlots, setSelectedTimeSlots] = useState(() => new Set());
   const [selectedSport, setSelectedSport] = useState("");
 
+  const [couponCode, setCouponCode] = useState("");
+  const [couponApplied, setCouponApplied] = useState(false);
+  const [couponError, setCouponError] = useState("");
+
+
   useEffect(() => {
     if (turf?.sports?.length === 1 && !selectedSport) setSelectedSport(turf.sports[0]);
   }, [turf, selectedSport]);
@@ -294,6 +299,31 @@ export default function BookingClient({ turfId, initialDate, initialBlockedHours
 
   const advanceAmount = Math.round(totalAmount * 0.1);
   const remainingAmount = totalAmount - advanceAmount;
+
+  const DISCOUNT_PERCENT = 20;
+
+  const discountAmount = couponApplied
+    ? Math.round((totalAmount * DISCOUNT_PERCENT) / 100)
+    : 0;
+
+  const discountedTotal = totalAmount - discountAmount;
+
+// Advance stays SAME
+  const finalAdvanceAmount = advanceAmount;
+
+// Pay at venue updates
+  const finalRemainingAmount = discountedTotal - finalAdvanceAmount;
+
+  const handleApplyCoupon = () => {
+  if (couponCode.trim().toUpperCase() === "EARLYBIRD") {
+    setCouponApplied(true);
+    setCouponError("");
+  } else {
+    setCouponApplied(false);
+    setCouponError("Invalid coupon code");
+  }
+};
+
   // 30 minutes before slot start -> disable
 const DISABLE_BEFORE_MS = 30 * 60 * 1000;
 
@@ -646,10 +676,45 @@ if (conflictsByTime.length > 0) {
           </div>
 
           <div className="lg:col-span-1">
-            <Card className="sticky top-24 border-gray-200">
+            {/* <Card className="sticky top-24 border-gray-200">
               <CardHeader>
                 <CardTitle className="text-lg text-black">Booking Summary</CardTitle>
-              </CardHeader>
+              </CardHeader> */}
+              <Card className="sticky top-24 border-gray-200">
+  <CardHeader className="space-y-3">
+    <CardTitle className="text-lg text-black">Booking Summary</CardTitle>
+
+    {/* Coupon Code */}
+    <div className="flex gap-2">
+      <input
+        type="text"
+        placeholder="Enter coupon code"
+        value={couponCode}
+        onChange={(e) => setCouponCode(e.target.value)}
+        className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
+        disabled={couponApplied}
+      />
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={handleApplyCoupon}
+        disabled={couponApplied}
+      >
+        Apply
+      </Button>
+    </div>
+
+    {couponApplied && (
+      <p className="text-xs text-green-600">
+        Coupon <strong>EARLYBIRD</strong> applied (20% off)
+      </p>
+    )}
+
+    {couponError && (
+      <p className="text-xs text-red-500">{couponError}</p>
+    )}
+  </CardHeader>
+
 
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -688,15 +753,22 @@ if (conflictsByTime.length > 0) {
                   <div className="space-y-2 pt-2 border-t border-gray-200">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Total Amount:</span>
-                      <span className="font-medium text-black">₹{totalAmount}</span>
+                      <span className="font-medium text-black">{/*₹{totalAmount}*/}₹{discountedTotal}</span>
                     </div>
+                    {couponApplied && (
+  <div className="flex justify-between text-sm text-green-600">
+    <span>Coupon Discount (20%):</span>
+    <span className="font-medium">-₹{discountAmount}</span>
+  </div>
+)}
+
                     <div className="flex justify-between text-sm text-green-600">
                       <span>Advance Payment (10%):</span>
-                      <span className="font-medium">₹{advanceAmount}</span>
+                      <span className="font-medium">{/*₹{advanceAmount}*/}₹{finalAdvanceAmount}</span>
                     </div>
                     <div className="flex justify-between text-sm text-orange-600">
                       <span>Pay at Venue:</span>
-                      <span className="font-medium">₹{remainingAmount}</span>
+                      <span className="font-medium">{/*₹{remainingAmount}*/}₹{finalRemainingAmount}</span>
                     </div>
                   </div>
                 )}
@@ -715,8 +787,8 @@ if (conflictsByTime.length > 0) {
                 <div className="text-xs text-gray-600 pt-2">
                   <p>• Pay only 10% advance online</p>
                   <p>• Remaining 90% to be paid at venue</p>
-                  <p>• Booking confirmation via SMS/Email</p>
-                  <p>• Cancellation allowed up to 2 hours before slot</p>
+                  {/* <p>• Booking confirmation via SMS/Email</p>
+                  <p>• Cancellation allowed up to 2 hours before slot</p> */}
                 </div>
               </CardContent>
             </Card>

@@ -351,7 +351,7 @@ export default function PaymentPage() {
                 ? "Finalizing your booking..."
                 : confirmError
                 ? "Booked, but we couldn't log the record. We'll fix this shortly."
-                : "You’ll receive a confirmation SMS and email shortly."}
+                : "Take a screenshot of this page and show it at the venue.."}
             </p>
 
             <div className="bg-card p-6 rounded-lg border mb-6 text-left">
