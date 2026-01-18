@@ -387,7 +387,7 @@ export default function TurfsPage() {
                           )
                         )
                         , React.createElement('div', { className: "text-right", __self: this, __source: {fileName: _jsxFileName, lineNumber: 303}}
-                          , React.createElement('div', { className: "text-2xl font-bold text-green-600"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 304}}, "₹", renderPrice(turf))
+                          , React.createElement('div', { className: "text-2xl font-bold text-green-600"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 304}}, renderPrice(turf))
                           , React.createElement('div', { className: "text-xs text-gray-500" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 305}}, "per hour" )
                         )
                       )
@@ -476,7 +476,7 @@ export default function TurfsPage() {
                         )
                       )
                       , React.createElement('div', { className: "text-right", __self: this, __source: {fileName: _jsxFileName, lineNumber: 392}}
-                        , React.createElement('div', { className: "text-lg font-bold text-green-600"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 393}}, "₹", renderPrice(turf))
+                        , React.createElement('div', { className: "text-lg font-bold text-green-600"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 393}}, renderPrice(turf))
                         , React.createElement('div', { className: "text-xs text-gray-500" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 394}}, "per hour" )
                       )
                     )
