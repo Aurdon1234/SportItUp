@@ -43,7 +43,6 @@ export default function TermsPage() {
 
 
               )
-              , React.createElement('li', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 44}}, "You must be at least 18 years old to create an account."           )
             )
 
             , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 47}}, "3. Booking and Payments"   )
@@ -51,23 +50,9 @@ export default function TermsPage() {
               , React.createElement('li', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 49}}, "Users can book available slots for listed venues through the Sportitup platform."           )
               , React.createElement('li', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 50}}, "Payments are processed securely through third-party payment gateways."       )
               , React.createElement('li', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 51}}, "Prices shown on the platform are determined by the turf/venue owners."          )
-              , React.createElement('li', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 52}}, "Sportitup may charge a convenience or service fee, which will be displayed at checkout."             )
             )
 
-            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 55}}, "4. Cancellations and Refunds"   )
-            , React.createElement('ul', { className: "list-disc pl-6 space-y-2"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 56}}
-              , React.createElement('li', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 57}}, "Each venue may have its own cancellation and refund policy, which will be displayed during booking."
-
-              )
-              , React.createElement('li', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 60}}, "Refunds (if applicable) will be processed through the same payment method within [X] business days."
-
-              )
-              , React.createElement('li', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 63}}, "Sportitup is not responsible for refunds if the cancellation terms set by the turf owner are not met."
-
-              )
-            )
-
-            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 68}}, "5. User Responsibilities"  )
+            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 68}}, "4. User Responsibilities"  )
             , React.createElement('p', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 69}}, "By using Sportitup, you agree that you will not:"        )
             , React.createElement('ul', { className: "list-disc pl-6 space-y-2"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 70}}
               , React.createElement('li', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 71}}, "Misuse or damage the facilities you book."      )
@@ -76,14 +61,14 @@ export default function TermsPage() {
               , React.createElement('li', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 74}}, "Engage in unlawful or abusive behavior on our platform or at the booked venue."             )
             )
 
-            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 77}}, "6. Turf Owner Responsibilities"   )
+            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 77}}, "5. Turf Owner Responsibilities"   )
             , React.createElement('ul', { className: "list-disc pl-6 space-y-2"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 78}}
               , React.createElement('li', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 79}}, "Turf owners must ensure the availability, safety, and quality of their facilities as listed."             )
               , React.createElement('li', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 80}}, "Turf owners are solely responsible for maintaining their venues and handling disputes with users."             )
               , React.createElement('li', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 81}}, "Sportitup acts only as a booking platform and is not responsible for turf management."             )
             )
 
-            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 84}}, "7. Liability Disclaimer"  )
+            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 84}}, "6. Liability Disclaimer"  )
             , React.createElement('ul', { className: "list-disc pl-6 space-y-2"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 85}}
               , React.createElement('li', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 86}}, "Sportitup is a booking facilitator. We do not own or operate the venues listed."             )
               , React.createElement('li', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 87}}, "We are not liable for any injury, loss, or damage that may occur during the use of the booked facility."
@@ -92,7 +77,7 @@ export default function TermsPage() {
               , React.createElement('li', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 90}}, "Users participate in sports at their own risk."       )
             )
 
-            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 93}}, "8. Service Availability"  )
+            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 93}}, "7. Service Availability"  )
             , React.createElement('ul', { className: "list-disc pl-6 space-y-2"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 94}}
               , React.createElement('li', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 95}}, "We aim to keep the platform running smoothly, but we do not guarantee uninterrupted or error-free service."
 
@@ -101,30 +86,30 @@ export default function TermsPage() {
               , React.createElement('li', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 99}}, "Sportitup reserves the right to modify, suspend, or discontinue services at any time."            )
             )
 
-            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 102}}, "9. Intellectual Property"  )
+            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 102}}, "8. Intellectual Property"  )
             , React.createElement('p', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 103}}, "All logos, trademarks, and content on Sportitup are the property of the company and cannot be used without permission."
 
 
             )
 
-            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 108}}, "10. Termination of Account"   )
+            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 108}}, "9. Termination of Account"   )
             , React.createElement('p', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 109}}, "Sportitup reserves the right to suspend or terminate accounts that violate these Terms."            )
 
-            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 111}}, "11. Changes to Terms"   )
+            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 111}}, "10. Changes to Terms"   )
             , React.createElement('p', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 112}}, "We may update these Terms from time to time. Continued use of Sportitup after changes means you accept the updated Terms."
 
 
             )
 
-            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 117}}, "12. Governing Law"  )
+            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 117}}, "11. Governing Law"  )
             , React.createElement('p', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 118}}, "These Terms are governed by the laws of India. Any disputes will be subject to the jurisdiction of courts in Amritsar, Punjab."
 
 
             )
 
-            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 123}}, "13. Contact Us"  )
+            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 123}}, "12. Contact Us"  )
             , React.createElement('p', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 124}}, "📧 Email: sportituporg@gmail.com"  )
-            , React.createElement('p', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 125}}, "🌐 Website: www.sportitup.in"  )
+            , React.createElement('p', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 126}}, "📞 Phone: +91 9988993456")
           )
         )
       )

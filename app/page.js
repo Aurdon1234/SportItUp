@@ -196,7 +196,7 @@ export default function HomePage() {
           )
 
           , React.createElement('div', { className: "border-t border-gray-200 mt-8 pt-8 text-center text-gray-600"     , __self: this, __source: {fileName: _jsxFileName, lineNumber: 251}}
-            , React.createElement('p', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 252}}, "© 2025 SportItUp.in. All rights reserved. Built for sports enthusiasts in Punjab."           )
+            , React.createElement('p', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 252}}, "© 2026 SportItUp.in. All rights reserved. Built for sports enthusiasts in Punjab."           )
           )
         )
       )

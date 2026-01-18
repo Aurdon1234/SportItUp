@@ -49,7 +49,6 @@ export default function PrivacyPage() {
               , React.createElement('li', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 47}}, "Process and confirm your turf bookings."     )
               , React.createElement('li', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 48}}, "Send booking confirmations, updates, or reminders."     )
               , React.createElement('li', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 49}}, "Improve our services, website, and user experience."      )
-              , React.createElement('li', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 50}}, "Notify you about promotions, offers, and new features (you can opt-out anytime)."           )
               , React.createElement('li', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 51}}, "Ensure security, prevent fraud, and comply with legal obligations."        )
             )
 
@@ -68,39 +67,28 @@ export default function PrivacyPage() {
 
             )
 
-            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 69}}, "5. Cookies & Tracking"   )
-            , React.createElement('p', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 70}}, "We use cookies and analytics tools to improve website performance, personalize your experience, and show relevant offers. You can control cookies through your browser settings."
-
-
-            )
-
-            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 75}}, "6. Your Rights"  )
+            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 75}}, "5. Your Rights"  )
             , React.createElement('ul', { className: "list-disc pl-6 space-y-2"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 76}}
               , React.createElement('li', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 77}}, "Access, update, or delete your personal data by contacting us."         )
-              , React.createElement('li', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 78}}, "Opt-out of marketing communications anytime."    )
               , React.createElement('li', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 79}}, "Request clarification about how your data is being used."        )
             )
 
-            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 82}}, "7. Third-Party Links"  )
+            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 82}}, "6. Third-Party Links"  )
             , React.createElement('p', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 83}}, "Our platform may contain links to third-party websites. We are not responsible for their privacy practices."
 
 
             )
 
-            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 88}}, "8. Children’s Privacy"  )
-            , React.createElement('p', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 89}}, "Our services are not intended for children under 13. We do not knowingly collect personal data from them."
 
-            )
-
-            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 93}}, "9. Updates to This Policy"    )
+            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 93}}, "7. Updates to This Policy"    )
             , React.createElement('p', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 94}}, "We may update this Privacy Policy from time to time. Any changes will be posted here with a new “Last Updated” date."
 
 
             )
 
-            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 99}}, "10. Contact Us"  )
+            , React.createElement('h2', { className: "text-xl font-semibold text-black mt-6"   , __self: this, __source: {fileName: _jsxFileName, lineNumber: 99}}, "8. Contact Us"  )
             , React.createElement('p', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 100}}, "📧 Email: sportituporg@gmail.com"  )
-            , React.createElement('p', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 101}}, "🌐 Website: www.sportitup.in"  )
+            , React.createElement('p', {__self: this, __source: {fileName: _jsxFileName, lineNumber: 102}}, "📞 Phone: +91 9988993456")
           )
         )
       )

@@ -14,13 +14,13 @@ import Link from "next/link"
 const getVenueCountBySport = (locationId, sport) => {
   if (!sport) {
     // Return total venues if no sport selected
-    return locationId === "amritsar" ? 0 : 3
+    return locationId === "amritsar" ? 0 : 1
   }
 
   if (sport === "cricket") {
-    return locationId === "amritsar" ? 0 : 1 // Amritsar: Super Six, theturfplay, Pavilion | Patiala: Box cricket
+    return locationId === "amritsar" ? 0 : 0 // Amritsar: Super Six, theturfplay, Pavilion | Patiala: Box cricket
   } else if (sport === "pickleball") {
-    return locationId === "amritsar" ? 0 : 2 // Amritsar: Pickleup, Pavilion | Patiala: Pickeball Patiala
+    return locationId === "amritsar" ? 0 : 1 // Amritsar: Pickleup, Pavilion | Patiala: Pickeball Patiala
   } else if (sport === "football") {
     return 0 // No football venues currently available
   }
