@@ -157,7 +157,7 @@ const generateTimeSlots = (openTime, closeTime) => {
     slots.push({
       time: time24,
       label: time12,
-      peak: hour >= 17 && hour < 22,
+      peak: hour >= 17 && hour < 24,
     });
   }
 
