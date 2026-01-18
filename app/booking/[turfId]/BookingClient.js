@@ -479,7 +479,7 @@ if (conflictsByTime.length > 0) {
                       {Array.isArray(turf.sports) &&
                         turf.sports.map((sport) => (
                           <SelectItem key={sport} value={sport}>
-                            {sport} - ₹{turf.pricePerHour}/hr
+                            {sport} - ₹{isPeakHour(time) ? turf.pricePeak : turf.priceNormal}/hr
                           </SelectItem>
                         ))}
                     </SelectContent>
