@@ -453,7 +453,7 @@ if (conflictsByTime.length > 0) {
                     </div>
                     <div className="text-green-600 font-medium">
   ₹{turf.priceNormal}/hr
-  {turf.pricePeak && (
+  {turf.pricePeak && turf.pricePeak !== turf.priceNormal && (
     <span className="ml-2 text-orange-600">
       (₹{turf.pricePeak}/hr peak)
     </span>

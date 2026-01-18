@@ -234,14 +234,30 @@ export default function TurfsPage() {
     return matchesSearch && matchesSport
   })
 
+  function renderPrice(turf) {
+  const normal = turf.priceNormal
+  const peak = turf.pricePeak
+
+  if (!normal) return null
+
+  // same price or no peak → single price
+  if (!peak || peak === normal) {
+    return <>₹{normal}</>
+  }
+
+  // different → range
+  return <>₹{normal} – ₹{peak}</>
+}
+
+
   const sortedTurfs = [...filteredTurfs].sort((a, b) => {
     switch (sortBy) {
       case "rating":
         return b.rating - a.rating
       case "price-low":
-        return a.pricePerHour - b.pricePerHour
+        return renderPrice(allSports) - renderPrice(b)
       case "price-high":
-        return b.pricePerHour - a.pricePerHour
+        return renderPrice(b) - renderPrice(a)
       default:
         return 0
     }
@@ -371,7 +387,7 @@ export default function TurfsPage() {
                           )
                         )
                         , React.createElement('div', { className: "text-right", __self: this, __source: {fileName: _jsxFileName, lineNumber: 303}}
-                          , React.createElement('div', { className: "text-2xl font-bold text-green-600"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 304}}, "₹", turf.pricePerHour)
+                          , React.createElement('div', { className: "text-2xl font-bold text-green-600"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 304}}, "₹", renderPrice(turf))
                           , React.createElement('div', { className: "text-xs text-gray-500" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 305}}, "per hour" )
                         )
                       )
@@ -460,7 +476,7 @@ export default function TurfsPage() {
                         )
                       )
                       , React.createElement('div', { className: "text-right", __self: this, __source: {fileName: _jsxFileName, lineNumber: 392}}
-                        , React.createElement('div', { className: "text-lg font-bold text-green-600"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 393}}, "₹", turf.pricePerHour)
+                        , React.createElement('div', { className: "text-lg font-bold text-green-600"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 393}}, "₹", renderPrice(turf))
                         , React.createElement('div', { className: "text-xs text-gray-500" , __self: this, __source: {fileName: _jsxFileName, lineNumber: 394}}, "per hour" )
                       )
                     )
