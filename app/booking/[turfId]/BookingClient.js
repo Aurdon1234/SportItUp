@@ -131,7 +131,7 @@ const turfData = {
     image: "/pinnacle-patiala.png",
     amenities: ["Floodlights", "Equipment", "Washrooms", "Parking"],
     openTime: "6:00 AM",
-    closeTime: "10:00 PM",
+    closeTime: "11:00 PM",
     city: "patiala",
   },  
 };

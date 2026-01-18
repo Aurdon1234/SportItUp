@@ -180,7 +180,7 @@ const turfs = [
     image: "/pinnacle-patiala.png",
     amenities: ["Floodlights", "Equipment", "Washrooms", "Parking", "WiFi"],
     openTime: "6:00 AM",
-    closeTime: "10:00 PM",
+    closeTime: "11:00 PM",
     featured: false,
     courts: 2,
   },
