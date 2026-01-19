@@ -130,11 +130,27 @@ const turfData = {
     rating: 5.0,
     reviews: 1,
     sports: ["Pickleball"],
-    // pricePerHour: 800,
     priceNormal: 600,
     pricePeak: 800,
+    hasPeakPricing: true,
     courts: 2,
     image: "/pinnacle-patiala.png",
+    amenities: ["Floodlights", "Equipment", "Washrooms", "Parking"],
+    openTime: "6:00 AM",
+    closeTime: "11:00 PM",
+    city: "patiala",
+  },  
+  "dmk-patiala": {
+    name: "DMK Royal Cube",
+    location: "434, Ranjit Nagar, Patiala",
+    rating: 4.9,
+    reviews: 87,
+    sports: ["Cricket", "Tennis"],
+    priceNormal: 800,
+    // pricePeak: 800,
+    hasPeakPricing: false,
+    courts: 1,
+    image: "/dmk-patiala.png",
     amenities: ["Floodlights", "Equipment", "Washrooms", "Parking"],
     openTime: "6:00 AM",
     closeTime: "11:00 PM",
@@ -145,13 +161,20 @@ const turfData = {
 const PEAK_START_HOUR = 16; // 4 PM
 const PEAK_END_HOUR = 24;   // 12 AM
 
-function isPeakHour(timeHHMM) {
+// function isPeakHour(timeHHMM) {
+//   const hour = parseInt(timeHHMM.split(":")[0], 10);
+//   return hour >= PEAK_START_HOUR && hour < PEAK_END_HOUR;
+// }
+function isPeakHour(turf, timeHHMM) {
+  if (!turf?.hasPeakPricing) return false;
+
   const hour = parseInt(timeHHMM.split(":")[0], 10);
   return hour >= PEAK_START_HOUR && hour < PEAK_END_HOUR;
 }
 
 
-const generateTimeSlots = (openTime, closeTime) => {
+
+const generateTimeSlots = (turf, openTime, closeTime) => {
   const slots = [];
   const parseTime = (timeStr) => {
     const [time, period] = timeStr.split(" ");
@@ -172,7 +195,8 @@ const generateTimeSlots = (openTime, closeTime) => {
     slots.push({
       time: time24,
       label: time12,
-      peak: hour >= PEAK_START_HOUR && hour < PEAK_END_HOUR,
+      // peak: hour >= PEAK_START_HOUR && hour < PEAK_END_HOUR,
+      peak: turf?.hasPeakPricing && hour >= PEAK_START_HOUR && hour < PEAK_END_HOUR,
     });
   }
 
@@ -253,8 +277,8 @@ export default function BookingClient({ turfId, initialDate, initialBlockedHours
     );
   }
 
-  const timeSlots = Array.isArray(generateTimeSlots(turf.openTime, turf.closeTime))
-    ? generateTimeSlots(turf.openTime, turf.closeTime)
+  const timeSlots = turf
+    ? generateTimeSlots(turf, turf.openTime, turf.closeTime)
     : [];
 
   // debug the computed timeslots
@@ -292,10 +316,12 @@ export default function BookingClient({ turfId, initialDate, initialBlockedHours
 
 
   const slotsCount = selectedTimeSlots.size;
-  // const totalAmount = slotsCount * (turf.pricePerHour || 0);
+  // const totalAmount = Array.from(selectedTimeSlots).reduce((sum, t) => {
+  // return sum + (isPeakHour(t) ? turf.pricePeak : turf.priceNormal);}, 0);
   const totalAmount = Array.from(selectedTimeSlots).reduce((sum, t) => {
-  return sum + (isPeakHour(t) ? turf.pricePeak : turf.priceNormal);}, 0);
-
+  const isPeak = isPeakHour(turf, t);
+  return sum + (isPeak ? turf.pricePeak : turf.priceNormal);
+}, 0);
 
   const advanceAmount = Math.round(totalAmount * 0.1);
   const remainingAmount = totalAmount - advanceAmount;
@@ -490,12 +516,20 @@ if (conflictsByTime.length > 0) {
                     </div>
                     <div className="text-green-600 font-medium">
   ₹{turf.priceNormal}/hr
-  {turf.pricePeak && turf.pricePeak !== turf.priceNormal && (
+  {turf.hasPeakPricing && turf.pricePeak && turf.pricePeak !== turf.priceNormal && (
     <span className="ml-2 text-orange-600">
       (₹{turf.pricePeak}/hr peak)
     </span>
   )}
 </div>
+                    {/* <div className="text-green-600 font-medium">
+  ₹{turf.priceNormal}/hr
+  {turf.pricePeak && turf.pricePeak !== turf.priceNormal && (
+    <span className="ml-2 text-orange-600">
+      (₹{turf.pricePeak}/hr peak)
+    </span>
+  )}
+</div> */}
                     {turf.courts && turf.courts > 1 && <div>{turf.courts} Courts Available</div>}
                   </div>
                 </div>
@@ -516,8 +550,13 @@ if (conflictsByTime.length > 0) {
                       {Array.isArray(turf.sports) &&
                         turf.sports.map((sport) => (
                           <SelectItem key={sport} value={sport}>
-                            {sport} : ₹{turf.priceNormal} {turf.pricePeak && turf.pricePeak !== turf.priceNormal && (<> - ₹{turf.pricePeak}</>
-  )}/hr
+                            {sport} : ₹{turf.priceNormal}
+{turf.hasPeakPricing && turf.pricePeak && turf.pricePeak !== turf.priceNormal && (
+  <> – ₹{turf.pricePeak}</>
+)}
+/hr
+                            {/* {sport} : ₹{turf.priceNormal} {turf.pricePeak && turf.pricePeak !== turf.priceNormal && (<> - ₹{turf.pricePeak}</>
+  )}/hr */}
                           </SelectItem>
                         ))}
                     </SelectContent>
@@ -653,7 +692,11 @@ if (conflictsByTime.length > 0) {
       disabled={disabled}
     >
       <span className="font-medium">{label}</span>
-      <span className="text-xs text-gray-600">₹{isPeakHour(time) ? turf.pricePeak : turf.priceNormal}</span>
+      {/* <span className="text-xs text-gray-600">₹{isPeakHour(time) ? turf.pricePeak : turf.priceNormal}</span> */}
+      <span className="text-xs text-gray-600">
+  ₹{isPeakHour(turf, time) ? turf.pricePeak : turf.priceNormal}
+</span>
+
       {slot.peak && <Badge className="absolute -top-1 -right-1 text-xs px-1 py-0 bg-orange-500">Peak</Badge>}
 
       {/* Badge/label showing reason */}

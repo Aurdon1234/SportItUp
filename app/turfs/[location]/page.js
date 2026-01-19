@@ -184,11 +184,28 @@ const turfs = [
     priceNormal: 600,
     pricePeak: 800,
     image: "/pinnacle-patiala.png",
-    amenities: ["Floodlights", "Equipment", "Washrooms", "Parking", "WiFi"],
+    amenities: ["Floodlights", "Equipment", "Washrooms", "Parking"],
     openTime: "6:00 AM",
     closeTime: "11:00 PM",
     featured: false,
     courts: 2,
+  },
+  {
+    id: "dmk-patiala",
+    name: "DMK Royal Cube",
+    location: "434, Ranjit Nagar, Patiala",
+    rating: 4.9,
+    reviews: 87,
+    sports: ["Cricket", "Tennis"],
+    // pricePerHour: 800,
+    priceNormal: 800,
+    pricePeak: 1000,
+    image: "/dmk-patiala.png",
+    amenities: ["Floodlights", "Equipment", "Washrooms", "Parking"],
+    openTime: "6:00 AM",
+    closeTime: "11:00 PM",
+    featured: false,
+    courts: 1,
   },
 ]
 
@@ -266,7 +283,7 @@ export default function TurfsPage() {
   const featuredTurfs = sortedTurfs.filter((turf) => turf.featured)
   const regularTurfs = sortedTurfs.filter((turf) => !turf.featured)
 
-  const allSports = ["Cricket", "Football", "Pickleball"]
+  const allSports = ["Cricket", "Football", "Pickleball", "Tennis"]
 
   const handleTurfSelect = (turfId) => {
     setSelectedTurf(turfId)
