@@ -166,7 +166,7 @@ const HARD_BLOCKED_HOURS_BY_TURF = {
 };
 
 const SPORT_COURT_MAP = {
-  "the-pavilion-amritsar": {
+  "pavilion-amritsar": {
     Pickleball: ["1", "2"],
     Cricket: ["3", "4"],
     Football: ["4"],
@@ -366,7 +366,7 @@ useEffect(() => {
 }, [avail, seededBlocked, safeTurfId]);
 
   const getCourtLabel = (turfId, courtNumber) => {
-  if (turfId === "the-pavilion-amritsar") {
+  if (turfId === "pavilion-amritsar") {
     if (courtNumber === "3") return "Cricket";
     if (courtNumber === "4") return "Multisport";
   }
