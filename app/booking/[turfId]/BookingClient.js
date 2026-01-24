@@ -79,20 +79,22 @@ const turfData = {
   //   closeTime: "11:00 PM",
   //   city: "amritsar",
   // },
-  // "the-pavilion-amritsar-pickleball": {
-  //   name: "The Pavilion Amritsar",
-  //   location: "Loharka Road, Amritsar",
-  //   rating: 4.8,
-  //   reviews: 145,
-  //   sports: ["Pickleball"],
-  //   pricePerHour: 1000,
-  //   courts: 2,
-  //   image: "/pickleball-court-amritsar-indoor-modern.png",
-  //   amenities: ["Floodlights", "Equipment", "Washrooms", "Parking"],
-  //   openTime: "6:00 AM",
-  //   closeTime: "11:59 PM",
-  //   city: "amritsar",
-  // },
+  "pavilion-amritsar": {
+    name: "The Pavilion Amritsar",
+    location: "Loharka Road, Amritsar",
+    rating: 4.6,
+    reviews: 11,
+    sports: ["Pickleball", "Cricket", "Football"],
+    // pricePerHour: 800,
+    pricing: {Pickleball: {normal: 1000,}, Cricket: {normal: 1200,}, Football: {normal: 1200,},},
+    hasPeakPricing: false,
+    courts: 4,
+    image: "/pavilion-amritsar.jpeg",
+    amenities: ["Floodlights", "Equipment", "Washrooms", "Parking"],
+    openTime: "6:00 AM",
+    closeTime: "12:00 AM",
+    city: "amritsar",
+  },
   // "box-cricket-patiala": {
   //   name: "Box Cricket Patiala",
   //   location: "Sheesh Mahal Enclave, Patiala",
@@ -163,6 +165,14 @@ const HARD_BLOCKED_HOURS_BY_TURF = {
   "dmk-patiala": ["15:00", "16:00", "17:00", "18:00"],
 };
 
+const SPORT_COURT_MAP = {
+  "the-pavilion-amritsar": {
+    Pickleball: ["1", "2"],
+    Cricket: ["3", "4"],
+    Football: ["4"],
+  },
+};
+
 const PEAK_START_HOUR = 16; // 4 PM
 const PEAK_END_HOUR = 24;   // 12 AM
 
@@ -192,8 +202,37 @@ function getSlotPrice(turf, sport, timeHHMM) {
   return sportPricing.normal;
 }
 
+// const generateTimeSlots = (turf, openTime, closeTime) => {
+//   const slots = [];
+//   const parseTime = (timeStr) => {
+//     const [time, period] = timeStr.split(" ");
+//     let [hours] = time.split(":").map(Number);
+//     if (period === "PM" && hours !== 12) hours += 12;
+//     if (period === "AM" && hours === 12) hours = 0;
+//     return hours;
+//   };
+
+//   const openHour = parseTime(openTime);
+//   const closeHour = parseTime(closeTime);
+
+//   for (let hour = openHour; hour < closeHour; hour++) {
+//     const time24 = hour.toString().padStart(2, "0") + ":00";
+//     const time12 =
+//       hour === 0 ? "12:00 AM" : hour < 12 ? `${hour}:00 AM` : hour === 12 ? "12:00 PM" : `${hour - 12}:00 PM`;
+
+//     slots.push({
+//       time: time24,
+//       label: time12,
+//       // peak: hour >= PEAK_START_HOUR && hour < PEAK_END_HOUR,
+//       peak: turf?.hasPeakPricing && hour >= PEAK_START_HOUR && hour < PEAK_END_HOUR,
+//     });
+//   }
+
+//   return slots;
+// };
 const generateTimeSlots = (turf, openTime, closeTime) => {
   const slots = [];
+
   const parseTime = (timeStr) => {
     const [time, period] = timeStr.split(" ");
     let [hours] = time.split(":").map(Number);
@@ -203,23 +242,40 @@ const generateTimeSlots = (turf, openTime, closeTime) => {
   };
 
   const openHour = parseTime(openTime);
-  const closeHour = parseTime(closeTime);
+  let closeHour = parseTime(closeTime);
+
+  // ✅ HANDLE OVERNIGHT (e.g. 6 AM → 2 AM)
+  if (closeHour <= openHour) {
+    closeHour += 24;
+  }
 
   for (let hour = openHour; hour < closeHour; hour++) {
-    const time24 = hour.toString().padStart(2, "0") + ":00";
+    const normalizedHour = hour % 24;
+
+    const time24 = String(normalizedHour).padStart(2, "0") + ":00";
+
     const time12 =
-      hour === 0 ? "12:00 AM" : hour < 12 ? `${hour}:00 AM` : hour === 12 ? "12:00 PM" : `${hour - 12}:00 PM`;
+      normalizedHour === 0
+        ? "12:00 AM"
+        : normalizedHour < 12
+        ? `${normalizedHour}:00 AM`
+        : normalizedHour === 12
+        ? "12:00 PM"
+        : `${normalizedHour - 12}:00 PM`;
 
     slots.push({
       time: time24,
       label: time12,
-      // peak: hour >= PEAK_START_HOUR && hour < PEAK_END_HOUR,
-      peak: turf?.hasPeakPricing && hour >= PEAK_START_HOUR && hour < PEAK_END_HOUR,
+      peak:
+        turf?.hasPeakPricing &&
+        normalizedHour >= PEAK_START_HOUR &&
+        normalizedHour < PEAK_END_HOUR,
     });
   }
 
   return slots;
 };
+
 
 export default function BookingClient({ turfId, initialDate, initialBlockedHours = [] }) {
   // defensive parse of props:
@@ -261,7 +317,22 @@ export default function BookingClient({ turfId, initialDate, initialBlockedHours
   ? `/api/public/availability?turfId=${encodeURIComponent(turfId)}&date=${encodeURIComponent(dateKey)}&court=${encodeURIComponent(selectedCourt)}`
   : null;
 
+  const allowedCourtsForSport = useMemo(() => {
+  if (!selectedSport) return null;
 
+  return (
+    SPORT_COURT_MAP[safeTurfId]?.[selectedSport] || null
+  );
+}, [safeTurfId, selectedSport]);
+
+useEffect(() => {
+  if (!allowedCourtsForSport) return;
+
+  if (!allowedCourtsForSport.includes(selectedCourt)) {
+    setSelectedCourt(allowedCourtsForSport[0]); // auto-pick first valid court
+    setSelectedTimeSlots(new Set()); // reset slots
+  }
+}, [allowedCourtsForSport, selectedCourt]);
 
   const { data: avail, error: availError } = useSWR(availabilityUrl, fetcher, {
     refreshInterval: 4000,
@@ -294,6 +365,13 @@ export default function BookingClient({ turfId, initialDate, initialBlockedHours
   return new Set(merged);
 }, [avail, seededBlocked, safeTurfId]);
 
+  const getCourtLabel = (turfId, courtNumber) => {
+  if (turfId === "the-pavilion-amritsar") {
+    if (courtNumber === "3") return "Cricket";
+    if (courtNumber === "4") return "Multisport";
+  }
+  return `Court ${courtNumber}`;
+};
 
   if (!turf) {
     // show a user-friendly message; avoid throwing
@@ -655,22 +733,43 @@ if (conflictsByTime.length > 0) {
         {Array.from({ length: courtsCount }).map((_, i) => {
           const court = `Court ${i + 1}`;
           const courtNumber = String(i + 1);
+
+          const isAllowed = !allowedCourtsForSport || allowedCourtsForSport.includes(courtNumber);
+
           return (
             <Button
   key={courtNumber}
   variant={selectedCourt === courtNumber ? "default" : "outline"}
-  className={
+  className={`${
     selectedCourt === courtNumber
       ? "bg-green-600 text-white"
       : "border-gray-200"
-  }
+  } ${!isAllowed ? "opacity-50 cursor-not-allowed" : ""}`}
+  disabled={!isAllowed}
   onClick={() => {
-    setSelectedTimeSlots(new Set()); // reset slots
-    setSelectedCourt(courtNumber);   // ✅ store ONLY number
+    if (!isAllowed) return;
+    setSelectedTimeSlots(new Set());
+    setSelectedCourt(courtNumber);
   }}
 >
-  Court {courtNumber} {/* UI label only */}
+  {/* Court {courtNumber} */}
+  {getCourtLabel(safeTurfId, courtNumber)}
 </Button>
+//             <Button
+//   key={courtNumber}
+//   variant={selectedCourt === courtNumber ? "default" : "outline"}
+//   className={
+//     selectedCourt === courtNumber
+//       ? "bg-green-600 text-white"
+//       : "border-gray-200"
+//   }
+//   onClick={() => {
+//     setSelectedTimeSlots(new Set()); // reset slots
+//     setSelectedCourt(courtNumber);   // ✅ store ONLY number
+//   }}
+// >
+//   Court {courtNumber} {/* UI label only */}
+// </Button>
 
           );
         })}
