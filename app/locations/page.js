@@ -14,17 +14,17 @@ import Link from "next/link"
 const getVenueCountBySport = (locationId, sport) => {
   if (!sport) {
     // Return total venues if no sport selected
-    return locationId === "amritsar" ? 0 : 2
+    return locationId === "amritsar" ? 1 : 2
   }
 
   if (sport === "cricket") {
-    return locationId === "amritsar" ? 0 : 1 // Amritsar: Super Six, theturfplay, Pavilion | Patiala: Box cricket
+    return locationId === "amritsar" ? 1 : 1 // Amritsar: Super Six, theturfplay, Pavilion | Patiala: Box cricket
   } else if (sport === "pickleball") {
-    return locationId === "amritsar" ? 0 : 1 // Amritsar: Pickleup, Pavilion | Patiala: Pickeball Patiala
+    return locationId === "amritsar" ? 1 : 1 // Amritsar: Pickleup, Pavilion | Patiala: Pickeball Patiala
   } else if (sport === "tennis") {
     return locationId === "amritsar" ? 0 : 1 // Amritsar: Pickleup, Pavilion | Patiala: Pickeball Patiala
   } else if (sport === "football") {
-    return 0 // No football venues currently available
+    return locationId === "amritsar" ? 1 : 0
   }
 
   return 0
@@ -141,9 +141,11 @@ export default function LocationsPage() {
                       alt: `${location.name} sports venues`,
                       className: "w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"     , __self: this, __source: {fileName: _jsxFileName, lineNumber: 141}}
                     )
-                    , React.createElement('div', { className: "absolute top-3 right-3" }, location.id === "amritsar" ? 
-                        React.createElement(Badge, { className: "bg-yellow-500 text-white" }, "Coming Soon") : 
+                    , React.createElement('div', { className: "absolute top-3 right-3" }, 
                         React.createElement(Badge, { className: "bg-green-600 text-white" }, "Available"))
+                      // location.id === "amritsar" ? 
+                      //   React.createElement(Badge, { className: "bg-yellow-500 text-white" }, "Coming Soon") : 
+                      //   React.createElement(Badge, { className: "bg-green-600 text-white" }, "Available"))
                   )
                   , React.createElement(CardHeader, { className: "pb-2", __self: this, __source: {fileName: _jsxFileName, lineNumber: 150}}
                     , React.createElement('div', { className: "flex items-center justify-between"  , __self: this, __source: {fileName: _jsxFileName, lineNumber: 151}}
