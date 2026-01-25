@@ -536,6 +536,7 @@ if (advanceAmount === 0) {
             {/* Payment method */}
             {detailsSaved && (
               <>
+              {advanceAmount > 0 && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-lg">Payment Method</CardTitle>
@@ -546,7 +547,6 @@ if (advanceAmount === 0) {
                       onValueChange={setPaymentMethod}
                       className="space-y-4"
                     >
-                    {advanceAmount > 0 && (
                       <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-card/50">
                         <RadioGroupItem value="razorpay" id="razorpay" />
                         <div className="flex items-center space-x-3 flex-1">
@@ -561,10 +561,10 @@ if (advanceAmount === 0) {
                           </div>
                         </div>
                       </div>
-                      )}
                     </RadioGroup>
                   </CardContent>
                 </Card>
+                )}
 
                 <Card>
                   <CardHeader>
