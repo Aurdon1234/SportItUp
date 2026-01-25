@@ -202,6 +202,27 @@ export default function PaymentPage() {
   const handlePayment = async () => {
     setIsProcessing(true);
 
+    // ✅ ZERO ADVANCE: skip payment gateway completely
+if (advanceAmount === 0) {
+  try {
+    setIsProcessing(true);
+
+    await confirmBookingOnServer({
+      provider: "no_payment",
+      simulated: true,
+      amount: 0,
+    });
+
+    setIsProcessing(false);
+    setPaymentSuccess(true);
+    return;
+  } catch (err) {
+    setIsProcessing(false);
+    alert("Failed to confirm booking. Please try again.");
+    return;
+  }
+}
+
     if (paymentMethod === "upi" && !formData.upiId) {
       alert("Please enter your UPI ID");
       setIsProcessing(false);
@@ -525,7 +546,7 @@ export default function PaymentPage() {
                       onValueChange={setPaymentMethod}
                       className="space-y-4"
                     >
-
+                    {advanceAmount > 0 && (
                       <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-card/50">
                         <RadioGroupItem value="razorpay" id="razorpay" />
                         <div className="flex items-center space-x-3 flex-1">
@@ -540,6 +561,7 @@ export default function PaymentPage() {
                           </div>
                         </div>
                       </div>
+                      )}
                     </RadioGroup>
                   </CardContent>
                 </Card>
@@ -555,13 +577,19 @@ export default function PaymentPage() {
                       onClick={handlePayment}
                       disabled={isProcessing || !detailsSaved}
                     >
-                      {isProcessing ? "Processing..." : `Pay ₹${advanceAmount} Advance`}
+                      {isProcessing ? "Processing..." : advanceAmount === 0 ? "Confirm Booking" : `Pay ₹${advanceAmount} Advance`}
                     </Button>
 
-                    <p className="text-xs text-muted-foreground">
+                    {/* <p className="text-xs text-muted-foreground">
                       You’ll pay ₹{advanceAmount} now and ₹{remainingAmount} at the venue. Total: ₹
                       {totalAmount}.
-                    </p>
+                    </p> */}
+                    <p className="text-xs text-muted-foreground">
+  {advanceAmount === 0
+    ? `No online payment required. Pay ₹${totalAmount} at the venue.`
+    : `You’ll pay ₹${advanceAmount} now and ₹${remainingAmount} at the venue. Total: ₹${totalAmount}.`}
+</p>
+
                   </CardContent>
                 </Card>
               </>
@@ -618,7 +646,7 @@ export default function PaymentPage() {
                     <span className="text-2xl font-bold text-primary">₹{totalAmount}</span>
                   </div>
                   <div className="flex justify-between text-sm text-green-700">
-                    <span>Paid Now (10% advance):</span>
+                    <span>{advanceAmount === 0 ? "Paid Online:" : "Paid Now (Advance):"}</span>
                     <span className="font-medium">₹{advanceAmount}</span>
                   </div>
                   <div className="flex justify-between text-sm text-orange-600">
