@@ -190,6 +190,19 @@ const FIXED_TOTAL_PRICING = {
   },
 };
 
+const TURF_BOOKING_RULES = {
+  "pavilion-amritsar": {
+    allowCoupon: false,
+    advancePercent: 0,
+  },
+};
+
+// defaults for all other turfs
+const DEFAULT_BOOKING_RULES = {
+  allowCoupon: true,
+  advancePercent: 10,
+};
+
 const PEAK_START_HOUR = 16; // 4 PM
 const PEAK_END_HOUR = 24;   // 12 AM
 
@@ -314,6 +327,12 @@ export default function BookingClient({ turfId, initialDate, initialBlockedHours
   const [couponApplied, setCouponApplied] = useState(false);
   const [couponError, setCouponError] = useState("");
 
+  const bookingRules = {
+  ...DEFAULT_BOOKING_RULES,
+  ...(TURF_BOOKING_RULES[safeTurfId] || {}),
+};
+
+const { allowCoupon, advancePercent } = bookingRules;
 
   useEffect(() => {
     if (turf?.sports?.length === 1 && !selectedSport) setSelectedSport(turf.sports[0]);
@@ -470,7 +489,10 @@ useEffect(() => {
       return sum + getSlotPrice(turf, sport, t);
     }, 0);
 
-  const advanceAmount = Math.round(totalAmount * 0.1);
+  // const advanceAmount = Math.round(totalAmount * 0.1);
+  // const remainingAmount = totalAmount - advanceAmount;
+
+  const advanceAmount = Math.round((totalAmount * advancePercent) / 100);
   const remainingAmount = totalAmount - advanceAmount;
 
   const DISCOUNT_PERCENT = 20;
@@ -921,6 +943,36 @@ if (conflictsByTime.length > 0) {
     <CardTitle className="text-lg text-black">Booking Summary</CardTitle>
 
     {/* Coupon Code */}
+    {/* <div className="flex gap-2">
+      <input
+        type="text"
+        placeholder="Enter coupon code"
+        value={couponCode}
+        onChange={(e) => setCouponCode(e.target.value)}
+        className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
+        disabled={couponApplied}
+      />
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={handleApplyCoupon}
+        disabled={couponApplied}
+      >
+        Apply
+      </Button>
+    </div>
+
+    {couponApplied && (
+      <p className="text-xs text-green-600">
+        Coupon <strong>EARLYBIRD</strong> applied (20% off)
+      </p>
+    )}
+
+    {couponError && (
+      <p className="text-xs text-red-500">{couponError}</p>
+    )} */}
+    {allowCoupon && (
+  <>
     <div className="flex gap-2">
       <input
         type="text"
@@ -949,6 +1001,9 @@ if (conflictsByTime.length > 0) {
     {couponError && (
       <p className="text-xs text-red-500">{couponError}</p>
     )}
+  </>
+)}
+
   </CardHeader>
 
 
@@ -999,7 +1054,7 @@ if (conflictsByTime.length > 0) {
 )}
 
                     <div className="flex justify-between text-sm text-green-600">
-                      <span>Advance Payment (10%):</span>
+                      <span>Advance Payment:</span>
                       <span className="font-medium">{/*₹{advanceAmount}*/}₹{finalAdvanceAmount}</span>
                     </div>
                     <div className="flex justify-between text-sm text-orange-600">
@@ -1016,7 +1071,7 @@ if (conflictsByTime.length > 0) {
                     onClick={handleProceedToPayment}
                     disabled={slotsCount === 0 || !selectedDate || (turf.sports.length > 1 && !selectedSport)}
                   >
-                    <CreditCard className="w-4 h-4 mr-2 inline-block" /> Pay ₹{selectedSport || turf.sports.length === 1 ? advanceAmount : 0} Advance
+                    <CreditCard className="w-4 h-4 mr-2 inline-block" /> {/*Pay ₹{selectedSport || turf.sports.length === 1 ? advanceAmount : 0} Advance*/}Pay ₹{finalAdvanceAmount} Advance
                   </Button>
                 </div>
 
