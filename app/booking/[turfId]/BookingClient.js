@@ -81,7 +81,7 @@ const turfData = {
   // },
   "pavilion-amritsar": {
     name: "The Pavilion Amritsar",
-    location: "Loharka Road, Amritsar",
+    location: "Next to RB Estate, Loharka Road, Amritsar",
     rating: 4.6,
     reviews: 11,
     sports: ["Pickleball", "Cricket", "Football"],
@@ -170,6 +170,23 @@ const SPORT_COURT_MAP = {
     Pickleball: ["1", "2"],
     Cricket: ["3", "4"],
     Football: ["4"],
+  },
+};
+
+const FIXED_TOTAL_PRICING = {
+  "pavilion-amritsar": {
+    Cricket: {
+      1: 1200,
+      2: 2200,
+      3: 3000,
+      max: 3,
+    },
+    Football: {
+      1: 1200,
+      2: 2200,
+      3: 3000,
+      max: 3,
+    },
   },
 };
 
@@ -396,44 +413,62 @@ useEffect(() => {
     console.log("[BookingClient] timeSlots computed:", timeSlots.map((s) => s.time));
   }, [turf]);
 
+//   const toggleTimeSlot = (time) => {
+//   if (!time) return;
+//   // if blocked by sheet -> no action
+//   if (blockedHoursSet.has(time)) return;
 
-  // const toggleTimeSlot = (time) => {
-  //   if (!time) return;
-  //   if (blockedHoursSet.has(time)) return; // blocked => no action
-  //   setSelectedTimeSlots((prev) => {
-  //     const next = new Set(prev);
-  //     if (next.has(time)) next.delete(time);
-  //     else next.add(time);
-  //     return next;
-  //   });
-  // };
+//   // if slot is within 30 min or passed -> no action
+//   if (isSlotTooCloseOrPast(selectedDate, time)) return;
 
+//   setSelectedTimeSlots((prev) => {
+//     const next = new Set(prev);
+//     if (next.has(time)) next.delete(time);
+//     else next.add(time);
+//     return next;
+//   });
+// };
   const toggleTimeSlot = (time) => {
   if (!time) return;
-  // if blocked by sheet -> no action
   if (blockedHoursSet.has(time)) return;
-
-  // if slot is within 30 min or passed -> no action
   if (isSlotTooCloseOrPast(selectedDate, time)) return;
+
+  const sport = selectedSport || turf.sports[0];
+  const fixedPricing =
+    FIXED_TOTAL_PRICING[safeTurfId]?.[sport];
+  const maxSlots = fixedPricing?.max;
 
   setSelectedTimeSlots((prev) => {
     const next = new Set(prev);
-    if (next.has(time)) next.delete(time);
-    else next.add(time);
+
+    if (next.has(time)) {
+      next.delete(time);
+      return next;
+    }
+
+    if (maxSlots && next.size >= maxSlots) {
+      alert(`Maximum ${maxSlots} slots allowed for ${sport}`);
+      return prev;
+    }
+
+    next.add(time);
     return next;
   });
 };
 
-
   const slotsCount = selectedTimeSlots.size;
-//   const totalAmount = Array.from(selectedTimeSlots).reduce((sum, t) => {
-//   const isPeak = isPeakHour(turf, t);
-//   return sum + (isPeak ? turf.pricePeak : turf.priceNormal);
-// }, 0);
-      const totalAmount = Array.from(selectedTimeSlots).reduce((sum, t) => {
-        return sum + getSlotPrice(turf, selectedSport || turf.sports[0], t);
-      }, 0);
+  const sport = selectedSport || turf.sports[0];
 
+  const fixedPricing =
+  FIXED_TOTAL_PRICING[safeTurfId]?.[sport];
+      // const totalAmount = Array.from(selectedTimeSlots).reduce((sum, t) => {
+      //   return sum + getSlotPrice(turf, selectedSport || turf.sports[0], t);
+      // }, 0);
+  const totalAmount = fixedPricing
+  ? fixedPricing[slotsCount] || 0
+  : Array.from(selectedTimeSlots).reduce((sum, t) => {
+      return sum + getSlotPrice(turf, sport, t);
+    }, 0);
 
   const advanceAmount = Math.round(totalAmount * 0.1);
   const remainingAmount = totalAmount - advanceAmount;

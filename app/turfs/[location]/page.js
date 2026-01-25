@@ -125,7 +125,7 @@ const turfs = [
   {
     id: "pavilion-amritsar",
     name: "The Pavilion Amritsar",
-    location: "Loharka Road, Amritsar",
+    location: "Next to RB Estate, Loharka Road, Amritsar",
     rating: 4.6,
     reviews: 11,
     sports: ["Pickleball", "Cricket", "Football"],
