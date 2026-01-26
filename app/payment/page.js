@@ -465,9 +465,9 @@ if (advanceAmount === 0) {
             {/* Intro */}
             <div>
               <h1 className="text-3xl font-bold text-foreground mb-2">Complete Your Booking</h1>
-              <p className="text-muted-foreground">
+              {/* <p className="text-muted-foreground">
                 Enter your details, then choose a payment method to pay the 10% advance.
-              </p>
+              </p> */}
             </div>
 
             {/* Customer details */}
@@ -561,6 +561,7 @@ if (advanceAmount === 0) {
                           </div>
                         </div>
                       </div>
+
                     </RadioGroup>
                   </CardContent>
                 </Card>
