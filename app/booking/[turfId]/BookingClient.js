@@ -88,7 +88,7 @@ const turfData = {
     // pricePerHour: 800,
     pricing: {Pickleball: {normal: 1000,}, Cricket: {normal: 1200,}, Football: {normal: 1200,},},
     hasPeakPricing: false,
-    courts: 4,
+    courts: 6,
     image: "/pavilion-amritsar.jpeg",
     amenities: ["Floodlights", "Equipment", "Washrooms", "Parking"],
     openTime: "6:00 AM",
@@ -167,9 +167,9 @@ const HARD_BLOCKED_HOURS_BY_TURF = {
 
 const SPORT_COURT_MAP = {
   "pavilion-amritsar": {
-    Pickleball: ["1", "2"],
-    Cricket: ["3", "4"],
-    Football: ["4"],
+    Pickleball: ["1", "2", "3", "4"],
+    Cricket: ["5", "6"],
+    Football: ["6"],
   },
 };
 
@@ -403,8 +403,8 @@ useEffect(() => {
 
   const getCourtLabel = (turfId, courtNumber) => {
   if (turfId === "pavilion-amritsar") {
-    if (courtNumber === "3") return "Cricket";
-    if (courtNumber === "4") return "Multisport";
+    if (courtNumber === "5") return "Cricket";
+    if (courtNumber === "6") return "Multisport";
   }
   return `Court ${courtNumber}`;
 };

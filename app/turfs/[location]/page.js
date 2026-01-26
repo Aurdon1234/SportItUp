@@ -137,7 +137,7 @@ const turfs = [
     openTime: "6:00 AM",
     closeTime: "12:00 AM",
     featured: false,
-    courts: 4,
+    courts: 6,
   },
   // Patiala Cricket Venues
   // {
