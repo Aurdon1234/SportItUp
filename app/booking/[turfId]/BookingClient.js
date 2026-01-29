@@ -512,7 +512,7 @@ useEffect(() => {
   const handleApplyCoupon = () => {
   if (couponCode.trim().toUpperCase() === "EARLYBIRD") {
     setCouponApplied(false);
-    setCouponError("");
+    setCouponError("Invalid coupon code");
   } else {
     setCouponApplied(false);
     setCouponError("Invalid coupon code");
